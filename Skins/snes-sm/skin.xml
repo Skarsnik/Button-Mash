@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<skin name="Super metroid snes" author="Skarsnik" type="snes">
+
+    <background name="Default" image="snes_blank.png" />
+
+    <button name="a" image="a_pressed.png" x="196" y="52" width="23" height="23" />
+    <button name="b" image="b_pressed.png" x="175" y="69" width="23" height="23" />
+    <button name="x" image="x_pressed.png" x="175" y="35" width="23" height="23" />
+    <button name="y" image="y_pressed.png" x="154" y="52" width="23" height="23" />
+
+    <button name="l" image="L_pressed.png" x="36" y="8" width="38" height="19" />
+    <button name="r" image="R_pressed.png" x="161" y="8" width="39" height="19" />
+
+    <button name="start" image="start_select_pressed.png" x="117" y="60" width="33" height="17" />
+	<button name="select" image="start_select_pressed.png" x="90" y="60" width="33" height="17" />
+	
+    <button name="up" image="up_pressed.png" x="44" y="42" width="20" height="12" />
+    <button name="down" image="down_pressed.png" x="44" y="77" width="20" height="12" />
+    <button name="left" image="left_pressed.png" x="30" y="56" width="12" height="20" />
+    <button name="right" image="right_pressed.png" x="66" y="56" width="12" height="20" />
+
+</skin>
