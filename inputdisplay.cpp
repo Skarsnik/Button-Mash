@@ -97,12 +97,14 @@ void InputDisplay::onInputNewLine(QByteArray data)
 
 void InputDisplay::onButtonPressed(InputDecoder::SNESButton button)
 {
-    mapItems[mapButtonToText[button]]->show();
+    if (mapItems.contains(mapButtonToText[button]))
+        mapItems[mapButtonToText[button]]->show();
 }
 
 void InputDisplay::onButtonReleased(InputDecoder::SNESButton button)
 {
-    mapItems[mapButtonToText[button]]->hide();
+    if (mapItems.contains(mapButtonToText[button]))
+        mapItems[mapButtonToText[button]]->hide();
 }
 
 void InputDisplay::closeEvent(QCloseEvent *ev)
