@@ -6,7 +6,7 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    InputDisplay d("D:/Project/snesclassicstuff/desktopclient/InputDisplay/Skins/snes-Derpy/skin.xml");
+    InputDisplay d("F:/Project/snesclassicstuff/desktopclient/InputDisplay/Skins/snes-sm/skin.xml");
     //SkinSelector w;
     //w.show();
     d.show();
