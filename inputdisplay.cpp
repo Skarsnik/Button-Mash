@@ -120,6 +120,7 @@ InputDisplay::InputDisplay(QString skin, QWidget *parent) :
     pianoButColor[InputDecoder::SNESButton::L] = Qt::gray;
     pianoButColor[InputDecoder::SNESButton::R] = Qt::gray;
     setPianoLabel();
+    this->setStyleSheet("background-color: black;");
 }
 
 void    InputDisplay::setPianoLabel()
