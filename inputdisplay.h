@@ -24,8 +24,11 @@ class InputDisplay : public QWidget
     };
 
 public:
-    explicit InputDisplay(QString skin, QWidget *parent = 0);
+    explicit InputDisplay(QString skin, QString pianoSkin, QWidget *parent = 0);
     ~InputDisplay();
+
+signals:
+    void    closed();
 
 private slots:
     void    onInputConnected();
@@ -43,6 +46,7 @@ private:
     QMap<InputDecoder::SNESButton, QList<PianoEvent> >  pianoEvents;
     QMap<InputDecoder::SNESButton, uint>                pianoButPos;
     QMap<InputDecoder::SNESButton, QColor>              pianoButColor;
+    QMap<InputDecoder::SNESButton, uint>                pianoButWidth;
     void    closeEvent(QCloseEvent* ev);
 
     TelnetConnection*   inputCo;
@@ -54,6 +58,8 @@ private:
     uint                pianoTimeRange;
     void filterPianoEvent();
     void setPianoLabel();
+    void configPianoDisplay(QString skinPath);
+
 };
 
 #endif // INPUTDISPLAY_H

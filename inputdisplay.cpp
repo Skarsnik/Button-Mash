@@ -8,7 +8,7 @@
 
 #define SNES_CLASSIC_IP "169.254.13.37"
 
-InputDisplay::InputDisplay(QString skin, QWidget *parent) :
+InputDisplay::InputDisplay(QString skin, QString pianoPath, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::InputDisplay)
 {
@@ -85,42 +85,79 @@ InputDisplay::InputDisplay(QString skin, QWidget *parent) :
     mapButtonToText[InputDecoder::SNESButton::Right] = "right";
     mapButtonToText[InputDecoder::SNESButton::Left] = "left";
 
-    pianoHeight = 200;
     pianoTimer.setInterval(33);
     pianoTimer.start();
     pianoTimeRange = 3000;
-    connect(&pianoTimer, SIGNAL(timeout()), this, SLOT(onPianoTimerTimeout()));
-    this->setFixedSize(405, scene->sceneRect().height() + pianoHeight + 45);
-    pianoDisplay = new QPixmap(400, pianoHeight);
-    pianoDisplay->fill(Qt::black);
-    ui->pianoLabel->setPixmap(*pianoDisplay);
-    pianoButPos[InputDecoder::SNESButton::Left] = 10;
-    pianoButPos[InputDecoder::SNESButton::Up] = 40;
-    pianoButPos[InputDecoder::SNESButton::Right] = 70;
-    pianoButPos[InputDecoder::SNESButton::Down] = 100;
-    pianoButPos[InputDecoder::SNESButton::Select] = 130;
-    pianoButPos[InputDecoder::SNESButton::Start] = 160;
-    pianoButPos[InputDecoder::SNESButton::A] = 280;
-    pianoButPos[InputDecoder::SNESButton::B] = 220;
-    pianoButPos[InputDecoder::SNESButton::Y] = 190;
-    pianoButPos[InputDecoder::SNESButton::X] = 250;
-    pianoButPos[InputDecoder::SNESButton::L] = 310;
-    pianoButPos[InputDecoder::SNESButton::R] = 340;
-
-    pianoButColor[InputDecoder::SNESButton::Left] = Qt::gray;
-    pianoButColor[InputDecoder::SNESButton::Up] = Qt::gray;
-    pianoButColor[InputDecoder::SNESButton::Right] = Qt::gray;
-    pianoButColor[InputDecoder::SNESButton::Down] = Qt::gray;
-    pianoButColor[InputDecoder::SNESButton::Start] = Qt::lightGray;
-    pianoButColor[InputDecoder::SNESButton::Select] = Qt::lightGray;
-    pianoButColor[InputDecoder::SNESButton::A] = Qt::red;
-    pianoButColor[InputDecoder::SNESButton::B] = Qt::yellow;
-    pianoButColor[InputDecoder::SNESButton::Y] = Qt::green;
-    pianoButColor[InputDecoder::SNESButton::X] = Qt::blue;
-    pianoButColor[InputDecoder::SNESButton::L] = Qt::gray;
-    pianoButColor[InputDecoder::SNESButton::R] = Qt::gray;
-    setPianoLabel();
+    pianoHeight = 0;
+    ui->pianoLabel->setVisible(false);
+    ui->pianoTagLabel->setVisible(false);
+    int windowWidth = scene->sceneRect().width() + 10;
+    if (!pianoPath.isEmpty())
+    {
+        configPianoDisplay(pianoPath);
+        ui->pianoLabel->setPixmap(*pianoDisplay);
+        setPianoLabel();
+        if (pianoDisplay->width() > windowWidth)
+            windowWidth = pianoDisplay->width();
+        pianoHeight = pianoDisplay->height();
+        connect(&pianoTimer, SIGNAL(timeout()), this, SLOT(onPianoTimerTimeout()));
+        ui->pianoLabel->setVisible(true);
+        ui->pianoTagLabel->setVisible(true);
+    }
+    this->setFixedSize(windowWidth, scene->sceneRect().height() + pianoHeight + 45);
     this->setStyleSheet("background-color: black;");
+}
+
+void    InputDisplay::configPianoDisplay(QString skinPath)
+{
+    QDomDocument    doc;
+    QString errorStr;
+    int errorLine;
+    int errorColumn;
+    QFileInfo fi(skinPath);
+    qDebug() << skinPath << fi.exists();
+    QFile   skinFile(skinPath);
+    skinFile.open(QIODevice::ReadOnly | QIODevice::Text);
+    QString xmlSkin = skinFile.readAll();
+    if (!doc.setContent(xmlSkin, true, &errorStr, &errorLine,
+                                   &errorColumn)) {
+        qDebug() << tr("Parse error at line %1, column %2:\n%3")
+                    .arg(errorLine)
+                    .arg(errorColumn)
+                    .arg(errorStr);
+    QMessageBox::information(window(), tr("DOM Bookmarks"),
+                                    tr("Parse error at line %1, column %2:\n%3")
+                                    .arg(errorLine)
+                                    .arg(errorColumn)
+                                    .arg(errorStr));
+    }
+    QDomElement root = doc.documentElement();
+    QDomElement child = root.firstChildElement();
+    while (!child.isNull())
+    {
+        qDebug() << child.tagName();
+        if (child.tagName() == "mainarea")
+        {
+            qDebug() << "Setting mainarea";
+            pianoDisplay = new QPixmap(child.attribute("width").toInt(), child.attribute("height").toInt());
+            pianoDisplay->fill(QColor(child.attribute("backgroundcolor")));
+            QDomElement domBut = child.firstChildElement();
+            while (!domBut.isNull())
+            {
+                if (domBut.tagName() == "button")
+                {
+                    InputDecoder::SNESButton but = mapButtonToText.key(domBut.attribute("name"));
+                    qDebug() << "Setting button " << domBut.attribute("name");
+                    pianoButPos[but] = domBut.attribute("x").toUInt();
+                    pianoButColor[but] = QColor(domBut.attribute("color"));
+                    pianoButWidth[but] = domBut.attribute("width").toUInt();
+                }
+                domBut = domBut.nextSiblingElement();
+            }
+        }
+
+        child = child.nextSiblingElement();
+    }
 }
 
 void    InputDisplay::setPianoLabel()
@@ -223,7 +260,7 @@ void InputDisplay::onPianoTimerTimeout()
                     yRect = (pe.endTime.msecsTo(now) * pianoHeight) / pianoTimeRange;
                     hRect = (pe.startTime.msecsTo(pe.endTime) * pianoHeight) / pianoTimeRange;
                 }
-                QRect   rect(pianoButPos[but], yRect, 20, hRect);
+                QRect   rect(pianoButPos[but], yRect, pianoButWidth[but], hRect);
                 qDebug() << rect;
 
                 //pa.setPen(Qt::blue);
@@ -240,6 +277,7 @@ void InputDisplay::closeEvent(QCloseEvent *ev)
     controlCo->syncExecuteCommand("killall hexdump");
     inputCo->close();
     controlCo->close();
+    emit closed();
 }
 
 
