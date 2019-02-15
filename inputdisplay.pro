@@ -28,13 +28,15 @@ SOURCES += \
         skinselector.cpp \
         ../inputdecoder.cpp \
         ../telnetconnection.cpp \
-    inputdisplay.cpp
+    inputdisplay.cpp \
+    skinparser.cpp
 
 HEADERS += \
         skinselector.h \
         ../inputdecoder.h \
         ../telnetconnection.h \
-    inputdisplay.h
+    inputdisplay.h \
+    skinparser.h
 
 FORMS += \
         skinselector.ui \

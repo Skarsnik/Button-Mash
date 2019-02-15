@@ -2,6 +2,7 @@
 #define SKINSELECTOR_H
 
 #include "inputdisplay.h"
+#include "skinparser.h"
 
 #include <QListView>
 #include <QMainWindow>
@@ -32,18 +33,21 @@ private slots:
 
     void on_skinPathButton_clicked();
 
+    void on_subSkinListView_clicked(const QModelIndex &index);
+
 private:
     Ui::SkinSelector *ui;
     QStandardItemModel* listModel;
     QStandardItemModel* pianoModel;
+    QStandardItemModel* subSkinModel;
     InputDisplay*       display;
     TelnetConnection*   testCo;
     QTimer              timer;
     QSettings*          m_settings;
+    RegularSkin         currentSkin;
 
     void    setSkinPath(QString path);
-    void    addToList(QStandardItemModel* model, QString xmlPath);
-    void    setPreviewScene(QString skin);
+    void    setPreviewScene(const RegularSkin &skin);
 };
 
 #endif // SKINSELECTOR_H

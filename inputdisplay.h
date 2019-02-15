@@ -7,6 +7,7 @@
 #include <QTimer>
 #include <QWidget>
 
+#include "skinparser.h"
 #include "../telnetconnection.h"
 #include "../inputdecoder.h"
 
@@ -24,7 +25,7 @@ class InputDisplay : public QWidget
     };
 
 public:
-    explicit InputDisplay(QString skin, QString pianoSkin, QWidget *parent = 0);
+    explicit InputDisplay(RegularSkin skin, PianoSkin pSkin, QWidget *parent = nullptr);
     ~InputDisplay();
 
 signals:
@@ -58,7 +59,7 @@ private:
     uint                pianoTimeRange;
     void filterPianoEvent();
     void setPianoLabel();
-    void configPianoDisplay(QString skinPath);
+    void configPianoDisplay(PianoSkin pSkin);
 
 };
 

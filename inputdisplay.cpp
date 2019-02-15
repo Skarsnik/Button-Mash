@@ -1,4 +1,5 @@
 #include "inputdisplay.h"
+#include "skinparser.h"
 #include "ui_inputdisplay.h"
 #include <QDomDocument>
 #include <QFileInfo>
@@ -8,57 +9,29 @@
 
 #define SNES_CLASSIC_IP "169.254.13.37"
 
-InputDisplay::InputDisplay(QString skin, QString pianoPath, QWidget *parent) :
+InputDisplay::InputDisplay(RegularSkin skin, PianoSkin pSkin, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::InputDisplay)
 {
     ui->setupUi(this);
     QDomDocument    doc;
     scene = new QGraphicsScene();
-    QFileInfo fi(skin);
-    QString errorStr;
-    int errorLine;
-    int errorColumn;
-    qDebug() << skin << QFileInfo::exists(skin);
-    QFile   skinFile(skin);
-    skinFile.open(QIODevice::ReadOnly | QIODevice::Text);
-    QString xmlSkin = skinFile.readAll();
-    if (!doc.setContent(xmlSkin, true, &errorStr, &errorLine,
-                                   &errorColumn)) {
-    QMessageBox::information(window(), tr("DOM Bookmarks"),
-                                    tr("Parse error at line %1, column %2:\n%3")
-                                    .arg(errorLine)
-                                    .arg(errorColumn)
-                                    .arg(errorStr));
+    QFileInfo fi(skin.file);
+    QPixmap background(fi.absolutePath() + "/" + skin.background);
+    scene->setSceneRect(0, 0, background.size().width(), background.size().height());
+    //this->setFixedSize(background.size().width() + 5, background.size().height() + 5);
+    scene->addPixmap(background);
+    foreach(RegularButtonSkin but, skin.buttons)
+    {
+        QPixmap pix(fi.absolutePath() + "/" + but.image);
+        QGraphicsPixmapItem* newPix = new QGraphicsPixmapItem(pix.scaled(but.width, but.height));
+        newPix->setPos(but.x, but.y);
+        newPix->setZValue(1);
+        scene->addItem(newPix);
+        mapItems[but.name] = newPix;
+        newPix->hide();
     }
-    QDomElement root = doc.documentElement();
-    QDomElement child = root.firstChildElement();
-    while (!child.isNull()) {
-           if (child.tagName() == "background")
-           {
-               qDebug() << fi.absolutePath() + "/" + child.attribute("image");
-               QPixmap background(fi.absolutePath() + "/" + child.attribute("image"));
-               scene->setSceneRect(0, 0, background.size().width(), background.size().height());
-               //this->setFixedSize(background.size().width() + 5, background.size().height() + 5);
-               scene->addPixmap(background);
-           }
-           if (child.tagName() == "button")
-           {
-               QPixmap pix(fi.absolutePath() + "/" + child.attribute("image"));
-               unsigned int width = child.attribute("width").toUInt();
-               unsigned int height = child.attribute("height").toUInt();
-               QGraphicsPixmapItem* newPix = new QGraphicsPixmapItem(pix.scaled(width, height));
-               newPix->setPos(child.attribute("x").toInt(), child.attribute("y").toInt());
-               newPix->setZValue(1);
-               scene->addItem(newPix);
-               mapItems[child.attribute("name")] = newPix;
-               newPix->hide();
-           }
-           child = child.nextSiblingElement();
-   }
     ui->graphicsView->setScene(scene);
-
-
 
     inputCo = new TelnetConnection(SNES_CLASSIC_IP, 23, "root", "clover");
     controlCo = new TelnetConnection(SNES_CLASSIC_IP, 23, "root", "clover");
@@ -92,9 +65,9 @@ InputDisplay::InputDisplay(QString skin, QString pianoPath, QWidget *parent) :
     ui->pianoLabel->setVisible(false);
     ui->pianoTagLabel->setVisible(false);
     int windowWidth = scene->sceneRect().width() + 10;
-    if (!pianoPath.isEmpty())
+    if (!pSkin.name.isEmpty())
     {
-        configPianoDisplay(pianoPath);
+        configPianoDisplay(pSkin);
         ui->pianoLabel->setPixmap(*pianoDisplay);
         setPianoLabel();
         if (pianoDisplay->width() > windowWidth)
@@ -108,55 +81,16 @@ InputDisplay::InputDisplay(QString skin, QString pianoPath, QWidget *parent) :
     this->setStyleSheet("background-color: black;");
 }
 
-void    InputDisplay::configPianoDisplay(QString skinPath)
+void    InputDisplay::configPianoDisplay(PianoSkin pSkin)
 {
-    QDomDocument    doc;
-    QString errorStr;
-    int errorLine;
-    int errorColumn;
-    QFileInfo fi(skinPath);
-    qDebug() << skinPath << fi.exists();
-    QFile   skinFile(skinPath);
-    skinFile.open(QIODevice::ReadOnly | QIODevice::Text);
-    QString xmlSkin = skinFile.readAll();
-    if (!doc.setContent(xmlSkin, true, &errorStr, &errorLine,
-                                   &errorColumn)) {
-        qDebug() << tr("Parse error at line %1, column %2:\n%3")
-                    .arg(errorLine)
-                    .arg(errorColumn)
-                    .arg(errorStr);
-    QMessageBox::information(window(), tr("DOM Bookmarks"),
-                                    tr("Parse error at line %1, column %2:\n%3")
-                                    .arg(errorLine)
-                                    .arg(errorColumn)
-                                    .arg(errorStr));
-    }
-    QDomElement root = doc.documentElement();
-    QDomElement child = root.firstChildElement();
-    while (!child.isNull())
+    QFileInfo fi(pSkin.file);
+    pianoDisplay = new QPixmap(pSkin.width, pSkin.height);
+    foreach(PianoButton pBut, pSkin.buttons)
     {
-        qDebug() << child.tagName();
-        if (child.tagName() == "mainarea")
-        {
-            qDebug() << "Setting mainarea";
-            pianoDisplay = new QPixmap(child.attribute("width").toInt(), child.attribute("height").toInt());
-            pianoDisplay->fill(QColor(child.attribute("backgroundcolor")));
-            QDomElement domBut = child.firstChildElement();
-            while (!domBut.isNull())
-            {
-                if (domBut.tagName() == "button")
-                {
-                    InputDecoder::SNESButton but = mapButtonToText.key(domBut.attribute("name"));
-                    qDebug() << "Setting button " << domBut.attribute("name");
-                    pianoButPos[but] = domBut.attribute("x").toUInt();
-                    pianoButColor[but] = QColor(domBut.attribute("color"));
-                    pianoButWidth[but] = domBut.attribute("width").toUInt();
-                }
-                domBut = domBut.nextSiblingElement();
-            }
-        }
-
-        child = child.nextSiblingElement();
+        InputDecoder::SNESButton but = mapButtonToText.key(pBut.name);
+        pianoButPos[but] = pBut.x;
+        pianoButColor[but] = pBut.color;
+        pianoButWidth[but] = pBut.width;
     }
 }
 
@@ -248,7 +182,7 @@ void InputDisplay::onPianoTimerTimeout()
         const QList<PianoEvent> ev = pianoEvents[but];
             foreach(PianoEvent pe, ev)
             {
-                qDebug() << pe.startTime << pe.endTime;
+                //qDebug() << pe.startTime << pe.endTime;
                 int yRect, hRect;
                 if (pe.endTime.isNull())
                 {
