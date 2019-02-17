@@ -38,6 +38,7 @@ SkinSelector::SkinSelector(QWidget *parent) :
     timer.setInterval(50);
     timer.start();
     display = nullptr;
+    snesClassicDecoder = new InputDecoder();
     ui->statusLabel->setText("Trying to connect to the SNES Classic, be sure you have hakchi CE installed on it");
     connect(&timer, &QTimer::timeout, this, &SkinSelector::onTimerTimeout);
     connect(testCo, &TelnetConnection::connected, this, &SkinSelector::onTelnetConnected);
@@ -87,16 +88,21 @@ void    SkinSelector::restoreLastSkin()
         if (sk.file == m_settings->value("lastSkin/regularSkinPath").toString())
         {
             ui->skinListView->setCurrentIndex(listModel->item(i)->index());
+            on_skinListView_clicked(listModel->item(i)->index());
             currentSkin = sk;
             if (!sk.subSkins.isEmpty())
             {
                 unsigned int j = 0;
-                foreach(RegularSkin sk, sk.subSkins)
+                qDebug() << "Sub skin" << m_settings->value("lastSkin/regularSubSkin").toString();
+                foreach(RegularSkin ssk, sk.subSkins)
                 {
-                    if (sk.name == m_settings->value("lastSkin/regularSubSkin").toString())
+                    qDebug() << ssk.name;
+                    if (ssk.name == m_settings->value("lastSkin/regularSubSkin").toString())
                     {
                         ui->subSkinListView->setCurrentIndex(subSkinModel->item(j)->index());
-                        currentSkin = sk;
+                        qDebug() << "Crash is here?";
+                        currentSkin = ssk;
+                        break;
                     }
                     j++;
                 }
@@ -187,10 +193,18 @@ void SkinSelector::on_startButton_clicked()
                 ui->pianoSkinListView->currentIndex())->data(Qt::UserRole + 2).value<PianoSkin>();
     }
     display = new InputDisplay(currentSkin, pSkin);
-    connect(display, &InputDisplay::closed, this, &SkinSelector::show);
+    display->setInputProvider(snesClassicDecoder);
+    connect(display, &InputDisplay::closed, this, &SkinSelector::onDisplayClosed);
     display->show();
     this->hide();
     saveSkinStarted();
+    inputCo = new TelnetConnection(SNES_CLASSIC_IP, 23, "root", "clover");
+    inputCo->debugName = "Input";
+    inputCo->conneect();
+    inputCo->setOneCommandMode(true);
+    //ArduinoCOM *arduino = new ArduinoCOM("COM6");
+    connect(inputCo, &TelnetConnection::commandReturnedNewLine , this, &SkinSelector::onInputNewLine);
+    connect(inputCo, &TelnetConnection::connected, this, &SkinSelector::onInputConnected);
 }
 
 void SkinSelector::on_pianoCheckBox_stateChanged(int arg1)
@@ -258,3 +272,22 @@ void SkinSelector::on_subSkinListView_clicked(const QModelIndex &index)
     currentSkin = skin;
     setPreviewScene(skin);
 }
+
+void SkinSelector::onInputConnected()
+{
+    inputCo->executeCommand("hexdump -v -e '32/1 \"%02X\" \"\\n\"' /dev/input/by-path/platform-twi.1-event-joystick");
+}
+
+void SkinSelector::onDisplayClosed()
+{
+    show();
+    testCo->executeCommand("killall hexdump");
+    inputCo->close();
+    inputCo->deleteLater();
+}
+
+void SkinSelector::onInputNewLine(QByteArray data)
+{
+    snesClassicDecoder->decodeHexdump(data);
+}
+

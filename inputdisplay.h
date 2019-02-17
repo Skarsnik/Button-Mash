@@ -8,8 +8,7 @@
 #include <QWidget>
 
 #include "skinparser.h"
-#include "../telnetconnection.h"
-#include "../inputdecoder.h"
+#include "inputprovider.h"
 
 namespace Ui {
 class InputDisplay;
@@ -26,16 +25,15 @@ class InputDisplay : public QWidget
 
 public:
     explicit InputDisplay(RegularSkin skin, PianoSkin pSkin, QWidget *parent = nullptr);
+    void     setInputProvider(InputProvider* inp);
     ~InputDisplay();
 
 signals:
     void    closed();
 
 private slots:
-    void    onInputConnected();
-    void    onInputNewLine(QByteArray data);
-    void    onButtonPressed(InputDecoder::SNESButton);
-    void    onButtonReleased(InputDecoder::SNESButton);
+    void    onButtonPressed(InputProvider::SNESButton);
+    void    onButtonReleased(InputProvider::SNESButton);
     void    onPianoTimerTimeout();
 
 private:
@@ -43,16 +41,14 @@ private:
 
     QGraphicsScene* scene;
     QMap<QString, QGraphicsPixmapItem*> mapItems;
-    QMap<InputDecoder::SNESButton, QString> mapButtonToText;
-    QMap<InputDecoder::SNESButton, QList<PianoEvent> >  pianoEvents;
-    QMap<InputDecoder::SNESButton, uint>                pianoButPos;
-    QMap<InputDecoder::SNESButton, QColor>              pianoButColor;
-    QMap<InputDecoder::SNESButton, uint>                pianoButWidth;
+    QMap<InputProvider::SNESButton, QString> mapButtonToText;
+    QMap<InputProvider::SNESButton, QList<PianoEvent> >  pianoEvents;
+    QMap<InputProvider::SNESButton, uint>                pianoButPos;
+    QMap<InputProvider::SNESButton, QColor>              pianoButColor;
+    QMap<InputProvider::SNESButton, uint>                pianoButWidth;
     void    closeEvent(QCloseEvent* ev);
 
-    TelnetConnection*   inputCo;
-    TelnetConnection*   controlCo;
-    InputDecoder*       inputDecoder;
+    InputProvider*      inputProvider;
     QPixmap*            pianoDisplay;
     QTimer              pianoTimer;
     uint                pianoHeight;

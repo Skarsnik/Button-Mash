@@ -31,7 +31,8 @@ SOURCES += \
     inputdisplay.cpp \
     skinparser.cpp \
     arduinocom.cpp \
-    inputprovider.cpp
+    inputprovider.cpp \
+    inputsourceselector.cpp
 
 HEADERS += \
         skinselector.h \
@@ -40,8 +41,10 @@ HEADERS += \
     inputdisplay.h \
     skinparser.h \
     arduinocom.h \
-    inputprovider.h
+    inputprovider.h \
+    inputsourceselector.h
 
 FORMS += \
         skinselector.ui \
-    inputdisplay.ui
+    inputdisplay.ui \
+    inputsourceselector.ui

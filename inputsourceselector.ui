@@ -1,21 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <author/>
- <comment/>
- <exportmacro/>
  <class>InputSourceSelector</class>
- <widget name="InputSourceSelector" class="QWidget">
+ <widget class="QWidget" name="InputSourceSelector">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>630</width>
+    <height>103</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
+  <widget class="QRadioButton" name="snesClassicRadioButton">
+   <property name="geometry">
+    <rect>
+     <x>50</x>
+     <y>20</y>
+     <width>82</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>SNES Classic</string>
+   </property>
+   <attribute name="buttonGroup">
+    <string notr="true">sourceRadioGroup</string>
+   </attribute>
+  </widget>
+  <widget class="QRadioButton" name="radioButton_2">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>160</x>
+     <y>20</y>
+     <width>151</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>SNES Classic (with mod)</string>
+   </property>
+   <attribute name="buttonGroup">
+    <string notr="true">sourceRadioGroup</string>
+   </attribute>
+  </widget>
+  <widget class="QRadioButton" name="radioButton_4">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>450</x>
+     <y>20</y>
+     <width>82</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>PC (XInput)</string>
+   </property>
+   <attribute name="buttonGroup">
+    <string notr="true">sourceRadioGroup</string>
+   </attribute>
+  </widget>
+  <widget class="QLabel" name="infoLabel">
+   <property name="geometry">
+    <rect>
+     <x>50</x>
+     <y>80</y>
+     <width>47</width>
+     <height>13</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>TextLabel</string>
+   </property>
+  </widget>
+  <widget class="QWidget" name="">
+   <property name="geometry">
+    <rect>
+     <x>310</x>
+     <y>20</y>
+     <width>106</width>
+     <height>47</height>
+    </rect>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QRadioButton" name="arduinoRadioButton">
+      <property name="text">
+       <string>SNES Arduino</string>
+      </property>
+      <attribute name="buttonGroup">
+       <string notr="true">sourceRadioGroup</string>
+      </attribute>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Port :</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="arduinoComComboBox"/>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
  </widget>
- <pixmapfunction/>
+ <resources/>
  <connections/>
+ <buttongroups>
+  <buttongroup name="sourceRadioGroup"/>
+ </buttongroups>
 </ui>

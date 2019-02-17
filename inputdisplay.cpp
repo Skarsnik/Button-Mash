@@ -34,33 +34,21 @@ InputDisplay::InputDisplay(RegularSkin skin, PianoSkin pSkin, QWidget *parent) :
     }
     ui->graphicsView->setScene(scene);
 
-    inputCo = new TelnetConnection(SNES_CLASSIC_IP, 23, "root", "clover");
-    controlCo = new TelnetConnection(SNES_CLASSIC_IP, 23, "root", "clover");
-    inputDecoder = new InputDecoder();
-    inputCo->debugName = "Input";
-    inputCo->conneect();
-    controlCo->conneect();
-    inputCo->setOneCommandMode(true);
-    //ArduinoCOM *arduino = new ArduinoCOM("COM6");
-    connect(inputCo, SIGNAL(commandReturnedNewLine(QByteArray)), this, SLOT(onInputNewLine(QByteArray)));
-    connect(inputCo, SIGNAL(connected()), this, SLOT(onInputConnected()));
-    connect(inputDecoder, SIGNAL(buttonPressed(InputDecoder::SNESButton)), this, SLOT(onButtonPressed(InputDecoder::SNESButton)));
-    connect(inputDecoder, SIGNAL(buttonReleased(InputDecoder::SNESButton)), this, SLOT(onButtonReleased(InputDecoder::SNESButton)));
     /*connect(arduino, &ArduinoCOM::buttonPressed, this, &InputDisplay::onButtonPressed);
     connect(arduino, &ArduinoCOM::buttonReleased, this, &InputDisplay::onButtonReleased);*/
 
-    mapButtonToText[InputDecoder::SNESButton::A] = "a";
-    mapButtonToText[InputDecoder::SNESButton::B] = "b";
-    mapButtonToText[InputDecoder::SNESButton::X] = "x";
-    mapButtonToText[InputDecoder::SNESButton::Y] = "y";
-    mapButtonToText[InputDecoder::SNESButton::L] = "l";
-    mapButtonToText[InputDecoder::SNESButton::R] = "r";
-    mapButtonToText[InputDecoder::SNESButton::Start] = "start";
-    mapButtonToText[InputDecoder::SNESButton::Select] = "select";
-    mapButtonToText[InputDecoder::SNESButton::Up] = "up";
-    mapButtonToText[InputDecoder::SNESButton::Down] = "down";
-    mapButtonToText[InputDecoder::SNESButton::Right] = "right";
-    mapButtonToText[InputDecoder::SNESButton::Left] = "left";
+    mapButtonToText[InputProvider::SNESButton::A] = "a";
+    mapButtonToText[InputProvider::SNESButton::B] = "b";
+    mapButtonToText[InputProvider::SNESButton::X] = "x";
+    mapButtonToText[InputProvider::SNESButton::Y] = "y";
+    mapButtonToText[InputProvider::SNESButton::L] = "l";
+    mapButtonToText[InputProvider::SNESButton::R] = "r";
+    mapButtonToText[InputProvider::SNESButton::Start] = "start";
+    mapButtonToText[InputProvider::SNESButton::Select] = "select";
+    mapButtonToText[InputProvider::SNESButton::Up] = "up";
+    mapButtonToText[InputProvider::SNESButton::Down] = "down";
+    mapButtonToText[InputProvider::SNESButton::Right] = "right";
+    mapButtonToText[InputProvider::SNESButton::Left] = "left";
 
     pianoTimer.setInterval(33);
     pianoTimer.start();
@@ -85,13 +73,21 @@ InputDisplay::InputDisplay(RegularSkin skin, PianoSkin pSkin, QWidget *parent) :
     this->setStyleSheet("background-color: black;");
 }
 
+void InputDisplay::setInputProvider(InputProvider *inp)
+{
+    inputProvider = inp;
+    connect(inputProvider, &InputProvider::buttonPressed, this, &InputDisplay::onButtonPressed);
+    connect(inputProvider, &InputProvider::buttonReleased, this, &InputDisplay::onButtonReleased);
+
+}
+
 void    InputDisplay::configPianoDisplay(PianoSkin pSkin)
 {
     QFileInfo fi(pSkin.file);
     pianoDisplay = new QPixmap(pSkin.width, pSkin.height);
     foreach(PianoButton pBut, pSkin.buttons)
     {
-        InputDecoder::SNESButton but = mapButtonToText.key(pBut.name);
+        InputProvider::SNESButton but = mapButtonToText.key(pBut.name);
         pianoButPos[but] = pBut.x;
         pianoButColor[but] = pBut.color;
         pianoButWidth[but] = pBut.width;
@@ -101,7 +97,7 @@ void    InputDisplay::configPianoDisplay(PianoSkin pSkin)
 void    InputDisplay::setPianoLabel()
 {
     QPixmap*    tag = new QPixmap(400, 30);
-    QMap<InputDecoder::SNESButton, QString>        alternateText;
+    QMap<InputProvider::SNESButton, QString>        alternateText;
     tag->fill(Qt::black);
     QPainter painter(tag);
     QFont font("DejaVu Sans Mono");
@@ -109,14 +105,14 @@ void    InputDisplay::setPianoLabel()
     font.setPixelSize(12);
     painter.setFont(font);
 
-    alternateText[InputDecoder::Left] = "<";
-    alternateText[InputDecoder::Right] = ">";
-    alternateText[InputDecoder::Up] = "^";
-    alternateText[InputDecoder::Down] = "v";
-    alternateText[InputDecoder::Start] = "ST";
-    alternateText[InputDecoder::Select] = "SEL";
+    alternateText[InputProvider::Left] = "<";
+    alternateText[InputProvider::Right] = ">";
+    alternateText[InputProvider::Up] = "^";
+    alternateText[InputProvider::Down] = "v";
+    alternateText[InputProvider::Start] = "ST";
+    alternateText[InputProvider::Select] = "SEL";
 
-    foreach(InputDecoder::SNESButton but, mapButtonToText.keys())
+    foreach(InputProvider::SNESButton but, mapButtonToText.keys())
     {
         QString butText;
         if (alternateText.contains(but))
@@ -130,17 +126,7 @@ void    InputDisplay::setPianoLabel()
 }
 
 
-void InputDisplay::onInputConnected()
-{
-    inputCo->executeCommand("hexdump -v -e '32/1 \"%02X\" \"\\n\"' /dev/input/by-path/platform-twi.1-event-joystick");
-}
-
-void InputDisplay::onInputNewLine(QByteArray data)
-{
-    inputDecoder->decodeHexdump(data);
-}
-
-void InputDisplay::onButtonPressed(InputDecoder::SNESButton button)
+void InputDisplay::onButtonPressed(InputProvider::SNESButton button)
 {
     if (mapItems.contains(mapButtonToText[button]))
         mapItems[mapButtonToText[button]]->show();
@@ -149,7 +135,7 @@ void InputDisplay::onButtonPressed(InputDecoder::SNESButton button)
     pianoEvents[button].append(pe);
 }
 
-void InputDisplay::onButtonReleased(InputDecoder::SNESButton button)
+void InputDisplay::onButtonReleased(InputProvider::SNESButton button)
 {
     if (mapItems.contains(mapButtonToText[button]))
         mapItems[mapButtonToText[button]]->hide();
@@ -160,7 +146,7 @@ void    InputDisplay::filterPianoEvent()
 {
         QTime now = QTime::currentTime();
         QTime bottomTime = now.addMSecs(static_cast<int>(pianoTimeRange) * -1);
-        foreach (InputDecoder::SNESButton but, pianoEvents.keys())
+        foreach (InputProvider::SNESButton but, pianoEvents.keys())
         {
             QMutableListIterator<PianoEvent> iPe(pianoEvents[but]);
             while (iPe.hasNext())
@@ -181,7 +167,7 @@ void InputDisplay::onPianoTimerTimeout()
     QPainter pa(pianoDisplay);
     pa.fillRect(pianoDisplay->rect(), Qt::black);
 
-    foreach (InputDecoder::SNESButton but, pianoEvents.keys())
+    foreach (InputProvider::SNESButton but, pianoEvents.keys())
     {
         const QList<PianoEvent> ev = pianoEvents[but];
             foreach(PianoEvent pe, ev)
@@ -212,10 +198,7 @@ void InputDisplay::onPianoTimerTimeout()
 
 void InputDisplay::closeEvent(QCloseEvent *ev)
 {
-    controlCo->syncExecuteCommand("killall hexdump");
-    inputCo->close();
-    controlCo->close();
-    emit closed();
+     emit closed();
 }
 
 
