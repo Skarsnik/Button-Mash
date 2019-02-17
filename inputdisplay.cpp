@@ -1,3 +1,4 @@
+#include "arduinocom.h"
 #include "inputdisplay.h"
 #include "skinparser.h"
 #include "ui_inputdisplay.h"
@@ -40,10 +41,13 @@ InputDisplay::InputDisplay(RegularSkin skin, PianoSkin pSkin, QWidget *parent) :
     inputCo->conneect();
     controlCo->conneect();
     inputCo->setOneCommandMode(true);
+    //ArduinoCOM *arduino = new ArduinoCOM("COM6");
     connect(inputCo, SIGNAL(commandReturnedNewLine(QByteArray)), this, SLOT(onInputNewLine(QByteArray)));
     connect(inputCo, SIGNAL(connected()), this, SLOT(onInputConnected()));
     connect(inputDecoder, SIGNAL(buttonPressed(InputDecoder::SNESButton)), this, SLOT(onButtonPressed(InputDecoder::SNESButton)));
     connect(inputDecoder, SIGNAL(buttonReleased(InputDecoder::SNESButton)), this, SLOT(onButtonReleased(InputDecoder::SNESButton)));
+    /*connect(arduino, &ArduinoCOM::buttonPressed, this, &InputDisplay::onButtonPressed);
+    connect(arduino, &ArduinoCOM::buttonReleased, this, &InputDisplay::onButtonReleased);*/
 
     mapButtonToText[InputDecoder::SNESButton::A] = "a";
     mapButtonToText[InputDecoder::SNESButton::B] = "b";
@@ -195,7 +199,7 @@ void InputDisplay::onPianoTimerTimeout()
                     hRect = (pe.startTime.msecsTo(pe.endTime) * pianoHeight) / pianoTimeRange;
                 }
                 QRect   rect(pianoButPos[but], yRect, pianoButWidth[but], hRect);
-                qDebug() << rect;
+                //qDebug() << rect;
 
                 //pa.setPen(Qt::blue);
                 pa.fillRect(rect, pianoButColor[but]);

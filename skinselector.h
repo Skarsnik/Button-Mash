@@ -48,6 +48,9 @@ private:
 
     void    setSkinPath(QString path);
     void    setPreviewScene(const RegularSkin &skin);
+    void    scanDevices();
+    void    saveSkinStarted();
+    void    restoreLastSkin();
 };
 
 #endif // SKINSELECTOR_H

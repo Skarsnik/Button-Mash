@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui network xml
+QT       += core gui network xml serialport
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -29,14 +29,18 @@ SOURCES += \
         ../inputdecoder.cpp \
         ../telnetconnection.cpp \
     inputdisplay.cpp \
-    skinparser.cpp
+    skinparser.cpp \
+    arduinocom.cpp \
+    inputprovider.cpp
 
 HEADERS += \
         skinselector.h \
         ../inputdecoder.h \
         ../telnetconnection.h \
     inputdisplay.h \
-    skinparser.h
+    skinparser.h \
+    arduinocom.h \
+    inputprovider.h
 
 FORMS += \
         skinselector.ui \

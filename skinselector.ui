@@ -26,7 +26,7 @@
    </widget>
    <widget class="QPushButton" name="startButton">
     <property name="enabled">
-     <bool>false</bool>
+     <bool>true</bool>
     </property>
     <property name="geometry">
      <rect>

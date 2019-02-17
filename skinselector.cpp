@@ -6,10 +6,12 @@
 #include "ui_skinselector.h"
 #include "inputdisplay.h"
 #include "skinparser.h"
+#include "arduinocom.h"
 
 #define SNES_CLASSIC_IP "169.254.13.37"
 
 #include <QDir>
+#include <QSerialPortInfo>
 #include <QStandardItemModel>
 
 SkinSelector::SkinSelector(QWidget *parent) :
@@ -30,14 +32,16 @@ SkinSelector::SkinSelector(QWidget *parent) :
     } else {
         setSkinPath(qApp->applicationDirPath() + "/Skins");
     }
+    //restoreLastSkin();
     testCo = new TelnetConnection(SNES_CLASSIC_IP, 23, "root", "clover");
     testCo->conneect();
-    timer.setInterval(1000);
+    timer.setInterval(50);
     timer.start();
     display = nullptr;
     ui->statusLabel->setText("Trying to connect to the SNES Classic, be sure you have hakchi CE installed on it");
     connect(&timer, &QTimer::timeout, this, &SkinSelector::onTimerTimeout);
     connect(testCo, &TelnetConnection::connected, this, &SkinSelector::onTelnetConnected);
+    scanDevices();
 }
 
 void    SkinSelector::setPreviewScene(const RegularSkin& skin)
@@ -64,6 +68,69 @@ void    SkinSelector::setPreviewScene(const RegularSkin& skin)
     ui->previewGraphicView->fitInView(scene->itemsBoundingRect(), Qt::KeepAspectRatio);
 }
 
+void SkinSelector::scanDevices()
+{
+   QList<QSerialPortInfo> infos = QSerialPortInfo::availablePorts();
+   foreach (QSerialPortInfo pInfo, infos)
+   {
+       qDebug() << pInfo.portName() << pInfo.description() << pInfo.serialNumber() << pInfo.manufacturer();
+   }
+
+}
+
+void    SkinSelector::restoreLastSkin()
+{
+    //Skin
+    for (unsigned int i = 0; i < listModel->rowCount(); i++)
+    {
+        const RegularSkin& sk = listModel->item(i)->data(Qt::UserRole + 2).value<RegularSkin>();
+        if (sk.file == m_settings->value("lastSkin/regularSkinPath").toString())
+        {
+            ui->skinListView->setCurrentIndex(listModel->item(i)->index());
+            currentSkin = sk;
+            if (!sk.subSkins.isEmpty())
+            {
+                unsigned int j = 0;
+                foreach(RegularSkin sk, sk.subSkins)
+                {
+                    if (sk.name == m_settings->value("lastSkin/regularSubSkin").toString())
+                    {
+                        ui->subSkinListView->setCurrentIndex(subSkinModel->item(j)->index());
+                        currentSkin = sk;
+                    }
+                    j++;
+                }
+            }
+            setPreviewScene(currentSkin);
+            break;
+        }
+    }
+    //Piano Display
+    qDebug() << "Piano Display" << m_settings->value("lastSkin/pianoDisplay");
+    if (!m_settings->value("lastSkin/pianoDisplay").toBool())
+        return;
+    ui->pianoCheckBox->setChecked(true);
+    for (unsigned int i = 0; i < pianoModel->rowCount(); i++)
+    {
+        const PianoSkin& sk = pianoModel->item(i)->data(Qt::UserRole + 2).value<PianoSkin>();
+        if (sk.file == m_settings->value("lastSkin/pianSkinPath").toString())
+        {
+            ui->pianoSkinListView->setCurrentIndex(pianoModel->item(i)->index());
+            break;
+        }
+    }
+}
+
+void    SkinSelector::saveSkinStarted()
+{
+    m_settings->setValue("lastSkin/pianoDisplay", ui->pianoCheckBox->isChecked());
+    m_settings->setValue("lastSkin/regularSkinPath", currentSkin.file);
+    m_settings->setValue("lastSkin/pianoSkinPath", pianoModel->itemFromIndex(
+                             ui->pianoSkinListView->currentIndex())->data(Qt::UserRole + 2).value<PianoSkin>().file);
+    m_settings->setValue("lastSkin/regularSubSkin", currentSkin.name);
+
+}
+
 void    SkinSelector::setSkinPath(QString path)
 {
     m_settings->setValue("skinFolder", path);
@@ -80,7 +147,7 @@ void    SkinSelector::setSkinPath(QString path)
             RegularSkin skin = SkinParser::parseRegularSkin(fi.absoluteFilePath() + "/skin.xml");
             if (!SkinParser::xmlError.isEmpty())
                 qDebug() << SkinParser::xmlError;
-            qDebug() << skin;
+            //qDebug() << skin;
             QStandardItem* item = new QStandardItem(QString(tr("%1 by %2")).arg(skin.name).arg(skin.author));
             QVariant var;
             var.setValue(skin);
@@ -91,7 +158,7 @@ void    SkinSelector::setSkinPath(QString path)
         {
             qDebug() << "Found a piano skin file";
             PianoSkin pSkin = SkinParser::parsePianoSkin(fi.absoluteFilePath() + "/pianodisplay.xml");
-            qDebug() << pSkin;
+            //qDebug() << pSkin;
             QStandardItem* item = new QStandardItem(QString(tr("%1 by %2")).arg(pSkin.name).arg(pSkin.author));
             QVariant var;
             var.setValue(pSkin);
@@ -123,6 +190,7 @@ void SkinSelector::on_startButton_clicked()
     connect(display, &InputDisplay::closed, this, &SkinSelector::show);
     display->show();
     this->hide();
+    saveSkinStarted();
 }
 
 void SkinSelector::on_pianoCheckBox_stateChanged(int arg1)
@@ -136,6 +204,8 @@ void SkinSelector::on_skinListView_clicked(const QModelIndex &index)
     subSkinModel->clear();
     if (skin.subSkins.isEmpty())
         currentSkin = skin;
+    else
+        currentSkin = skin.subSkins.first();
     foreach(RegularSkin sk, skin.subSkins)
     {
         QStandardItem* item = new QStandardItem(sk.name);
@@ -156,6 +226,14 @@ void SkinSelector::onTelnetConnected()
 
 void SkinSelector::onTimerTimeout()
 {
+    static bool first = true;
+    if (first)
+    {
+        first = false;
+        timer.setInterval(1000);
+        restoreLastSkin();
+        return ;
+    }
     if (display != nullptr && display->isVisible())
         return ;
     if (testCo->state() != TelnetConnection::Connected)
