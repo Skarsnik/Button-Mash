@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>615</width>
-    <height>496</height>
+    <width>664</width>
+    <height>677</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,8 +17,8 @@
    <widget class="QListView" name="skinListView">
     <property name="geometry">
      <rect>
-      <x>30</x>
-      <y>150</y>
+      <x>40</x>
+      <y>321</y>
       <width>251</width>
       <height>161</height>
      </rect>
@@ -30,8 +30,8 @@
     </property>
     <property name="geometry">
      <rect>
-      <x>440</x>
-      <y>390</y>
+      <x>450</x>
+      <y>561</y>
       <width>131</width>
       <height>81</height>
      </rect>
@@ -43,8 +43,8 @@
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>70</x>
-      <y>20</y>
+      <x>80</x>
+      <y>191</y>
       <width>461</width>
       <height>25</height>
      </rect>
@@ -76,8 +76,8 @@
    <widget class="QLabel" name="label_2">
     <property name="geometry">
      <rect>
-      <x>40</x>
-      <y>130</y>
+      <x>50</x>
+      <y>301</y>
       <width>91</width>
       <height>16</height>
      </rect>
@@ -92,8 +92,8 @@
     </property>
     <property name="geometry">
      <rect>
-      <x>30</x>
-      <y>350</y>
+      <x>40</x>
+      <y>521</y>
       <width>251</width>
       <height>121</height>
      </rect>
@@ -105,8 +105,8 @@
     </property>
     <property name="geometry">
      <rect>
-      <x>30</x>
-      <y>320</y>
+      <x>40</x>
+      <y>491</y>
       <width>131</width>
       <height>17</height>
      </rect>
@@ -121,8 +121,8 @@
     </property>
     <property name="geometry">
      <rect>
-      <x>310</x>
-      <y>150</y>
+      <x>320</x>
+      <y>321</y>
       <width>281</width>
       <height>151</height>
      </rect>
@@ -131,8 +131,8 @@
    <widget class="QGraphicsView" name="previewGraphicView">
     <property name="geometry">
      <rect>
-      <x>190</x>
-      <y>50</y>
+      <x>200</x>
+      <y>221</y>
       <width>261</width>
       <height>81</height>
      </rect>
@@ -147,8 +147,8 @@
    <widget class="QLabel" name="statusLabel">
     <property name="geometry">
      <rect>
-      <x>310</x>
-      <y>329</y>
+      <x>320</x>
+      <y>500</y>
       <width>291</width>
       <height>51</height>
      </rect>
@@ -157,10 +157,28 @@
      <string>status label</string>
     </property>
    </widget>
+   <widget class="InputSourceSelector" name="inputSourceSelector" native="true">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>50</y>
+      <width>611</width>
+      <height>91</height>
+     </rect>
+    </property>
+   </widget>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>InputSourceSelector</class>
+   <extends>QWidget</extends>
+   <header>inputsourceselector.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

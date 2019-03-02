@@ -2,13 +2,14 @@
 #include "../telnetconnection.h"
 #include <QApplication>
 #include "inputdisplay.h"
+#include "mapbuttondialog.h"
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    //InputDisplay d("F:/Project/snesclassicstuff/desktopclient/InputDisplay/Skins/snes-sm/skin.xml");
     SkinSelector w;
     w.show();
-    //d.show();
+    /*MapButtonDialog diag;
+    diag.show();*/
     return a.exec();
 }

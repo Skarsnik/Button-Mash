@@ -42,7 +42,6 @@ SkinSelector::SkinSelector(QWidget *parent) :
     ui->statusLabel->setText("Trying to connect to the SNES Classic, be sure you have hakchi CE installed on it");
     connect(&timer, &QTimer::timeout, this, &SkinSelector::onTimerTimeout);
     connect(testCo, &TelnetConnection::connected, this, &SkinSelector::onTelnetConnected);
-    scanDevices();
 }
 
 void    SkinSelector::setPreviewScene(const RegularSkin& skin)
@@ -67,16 +66,6 @@ void    SkinSelector::setPreviewScene(const RegularSkin& skin)
         scene->addItem(newPix);
     }
     ui->previewGraphicView->fitInView(scene->itemsBoundingRect(), Qt::KeepAspectRatio);
-}
-
-void SkinSelector::scanDevices()
-{
-   QList<QSerialPortInfo> infos = QSerialPortInfo::availablePorts();
-   foreach (QSerialPortInfo pInfo, infos)
-   {
-       qDebug() << pInfo.portName() << pInfo.description() << pInfo.serialNumber() << pInfo.manufacturer();
-   }
-
 }
 
 void    SkinSelector::restoreLastSkin()
@@ -246,8 +235,10 @@ void SkinSelector::onTimerTimeout()
         first = false;
         timer.setInterval(1000);
         restoreLastSkin();
+        ui->inputSourceSelector->scanDevices();
         return ;
     }
+    ui->inputSourceSelector->scanDevices();
     if (display != nullptr && display->isVisible())
         return ;
     if (testCo->state() != TelnetConnection::Connected)

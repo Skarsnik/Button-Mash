@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui network xml serialport
+QT       += core gui network xml serialport gamepad websockets
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -32,7 +32,11 @@ SOURCES += \
     skinparser.cpp \
     arduinocom.cpp \
     inputprovider.cpp \
-    inputsourceselector.cpp
+    inputsourceselector.cpp \
+    qgamepadsource.cpp \
+    mapbuttondialog.cpp \
+    usb2snessource.cpp \
+    usb2snes.cpp
 
 HEADERS += \
         skinselector.h \
@@ -42,9 +46,14 @@ HEADERS += \
     skinparser.h \
     arduinocom.h \
     inputprovider.h \
-    inputsourceselector.h
+    inputsourceselector.h \
+    qgamepadsource.h \
+    mapbuttondialog.h \
+    usb2snessource.h \
+    usb2snes.h
 
 FORMS += \
         skinselector.ui \
     inputdisplay.ui \
-    inputsourceselector.ui
+    inputsourceselector.ui \
+    mapbuttondialog.ui
