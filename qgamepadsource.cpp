@@ -29,3 +29,27 @@ void QGamepadSource::onGamepadAxisEvent(int deviceId, QGamepadManager::GamepadAx
 {
 
 }
+
+
+void QGamepadSource::start()
+{
+}
+
+void QGamepadSource::stop()
+{
+}
+
+bool QGamepadSource::isReady()
+{
+    return true;
+}
+
+QString QGamepadSource::statusText()
+{
+    return tr("Gamepad connected");
+}
+
+QString QGamepadSource::name()
+{
+    return QGamepadManager::instance()->gamepadName(m_deviceId);
+}

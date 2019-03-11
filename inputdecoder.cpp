@@ -2,7 +2,7 @@
 #include <QtEndian>
 #include <QDebug>
 
-InputDecoder::InputDecoder() : InputProvider ()
+InputDecoder::InputDecoder()
 {
     Lpressed = false;
     Rpressed = false;
@@ -91,9 +91,9 @@ void    InputDecoder::processEvent(RawInputEvent ev)
         if (ev.code == 311 || ev.code == 310)
             return;
         if (ev.value == 1)
-            emit buttonPressed((InputDecoder::SNESButton)ev.code);
+            emit buttonPressed((InputProvider::SNESButton)ev.code);
         if (ev.value == 0)
-            emit buttonReleased((InputDecoder::SNESButton)ev.code);
+            emit buttonReleased((InputProvider::SNESButton)ev.code);
 
     }
     if (ev.type == 0x03) // for L and R
@@ -101,17 +101,17 @@ void    InputDecoder::processEvent(RawInputEvent ev)
         if (ev.code == 2)
         {
             if (Lpressed)
-                emit buttonReleased((InputDecoder::SNESButton)ev.code);
+                emit buttonReleased((InputProvider::SNESButton)ev.code);
             else
-                emit buttonPressed((InputDecoder::SNESButton)ev.code);
+                emit buttonPressed((InputProvider::SNESButton)ev.code);
             Lpressed = !Lpressed;
         }
         if (ev.code == 5)
         {
             if (Rpressed)
-                emit buttonReleased((InputDecoder::SNESButton)ev.code);
+                emit buttonReleased((InputProvider::SNESButton)ev.code);
             else
-                emit buttonPressed((InputDecoder::SNESButton)ev.code);
+                emit buttonPressed((InputProvider::SNESButton)ev.code);
             Rpressed = !Rpressed;
         }
     }

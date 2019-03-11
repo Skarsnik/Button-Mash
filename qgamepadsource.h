@@ -10,6 +10,11 @@ class QGamepadSource : public InputProvider
 {
 public:
     QGamepadSource(int device);
+    void start();
+    void stop();
+    bool isReady();
+    QString statusText();
+    QString name();
 
 
 private slots:
@@ -22,7 +27,7 @@ private slots:
 private:
     int m_deviceId;
     QMap<QGamepadManager::GamepadButton, InputProvider::SNESButton> butMapping;
-    QMap<QPair<QGamepadManager::GamepadAxis, double>, InputProvider::SNESButton>    axisMapping;
+    QMap<QPair<QGamepadManager::GamepadAxis, double>, InputProvider::SNESButton>    axisMapping;  
 
 };
 

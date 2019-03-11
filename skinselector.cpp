@@ -8,10 +8,7 @@
 #include "skinparser.h"
 #include "arduinocom.h"
 
-#define SNES_CLASSIC_IP "169.254.13.37"
-
 #include <QDir>
-#include <QSerialPortInfo>
 #include <QStandardItemModel>
 
 SkinSelector::SkinSelector(QWidget *parent) :
@@ -32,16 +29,12 @@ SkinSelector::SkinSelector(QWidget *parent) :
     } else {
         setSkinPath(qApp->applicationDirPath() + "/Skins");
     }
-    //restoreLastSkin();
-    testCo = new TelnetConnection(SNES_CLASSIC_IP, 23, "root", "clover");
-    testCo->conneect();
     timer.setInterval(50);
     timer.start();
     display = nullptr;
-    snesClassicDecoder = new InputDecoder();
-    ui->statusLabel->setText("Trying to connect to the SNES Classic, be sure you have hakchi CE installed on it");
+    //ui->statusLabel->setText("Trying to connect to the SNES Classic, be sure you have hakchi CE installed on it");
     connect(&timer, &QTimer::timeout, this, &SkinSelector::onTimerTimeout);
-    connect(testCo, &TelnetConnection::connected, this, &SkinSelector::onTelnetConnected);
+    inputSelector = new InputSourceSelector(this);
 }
 
 void    SkinSelector::setPreviewScene(const RegularSkin& skin)
@@ -174,7 +167,6 @@ SkinSelector::~SkinSelector()
 
 void SkinSelector::on_startButton_clicked()
 {
-    testCo->close();
     PianoSkin pSkin;
     if (ui->pianoCheckBox->isChecked())
     {
@@ -182,19 +174,13 @@ void SkinSelector::on_startButton_clicked()
                 ui->pianoSkinListView->currentIndex())->data(Qt::UserRole + 2).value<PianoSkin>();
     }
     display = new InputDisplay(currentSkin, pSkin);
-    display->setInputProvider(snesClassicDecoder);
+    display->setInputProvider(inputProvider);
     connect(display, &InputDisplay::closed, this, &SkinSelector::onDisplayClosed);
     display->show();
+    inputProvider->start();
     this->hide();
     saveSkinStarted();
-    inputCo = new TelnetConnection(SNES_CLASSIC_IP, 23, "root", "clover");
-    inputCo->debugName = "Input";
-    inputCo->conneect();
-    inputCo->setOneCommandMode(true);
-    //ArduinoCOM *arduino = new ArduinoCOM("COM6");
-    connect(inputCo, &TelnetConnection::commandReturnedNewLine , this, &SkinSelector::onInputNewLine);
-    connect(inputCo, &TelnetConnection::connected, this, &SkinSelector::onInputConnected);
-}
+  }
 
 void SkinSelector::on_pianoCheckBox_stateChanged(int arg1)
 {
@@ -221,12 +207,6 @@ void SkinSelector::on_skinListView_clicked(const QModelIndex &index)
     setPreviewScene(skin);
 }
 
-void SkinSelector::onTelnetConnected()
-{
-    ui->statusLabel->setText("Connection etablished, ready to go");
-    ui->startButton->setEnabled(true);
-}
-
 void SkinSelector::onTimerTimeout()
 {
     static bool first = true;
@@ -235,20 +215,17 @@ void SkinSelector::onTimerTimeout()
         first = false;
         timer.setInterval(1000);
         restoreLastSkin();
-        ui->inputSourceSelector->scanDevices();
+        inputProvider = inputSelector->getLastProvider(m_settings);
+        if (inputProvider != nullptr)
+            ui->sourceLabel->setText(QString("<b>%1</b>").arg(inputProvider->name()));
+        else
+            ui->sourceLabel->setText(tr("No Source provider selected"));
         return ;
     }
-    ui->inputSourceSelector->scanDevices();
     if (display != nullptr && display->isVisible())
         return ;
-    if (testCo->state() != TelnetConnection::Connected)
-    {
-        ui->statusLabel->setText("Trying to connect to the SNES Classic, be sure you have hakchi CE installed on it");
-        ui->startButton->setEnabled(false);
-        testCo->conneect();
-    } else {
-        ui->startButton->setEnabled(true);
-    }
+    ui->statusLabel->setText(inputProvider->statusText());
+    ui->startButton->setEnabled(inputProvider->isReady());
 }
 
 void SkinSelector::on_skinPathButton_clicked()
@@ -264,21 +241,31 @@ void SkinSelector::on_subSkinListView_clicked(const QModelIndex &index)
     setPreviewScene(skin);
 }
 
-void SkinSelector::onInputConnected()
-{
-    inputCo->executeCommand("hexdump -v -e '32/1 \"%02X\" \"\\n\"' /dev/input/by-path/platform-twi.1-event-joystick");
-}
 
 void SkinSelector::onDisplayClosed()
 {
     show();
-    testCo->executeCommand("killall hexdump");
-    inputCo->close();
-    inputCo->deleteLater();
+    inputProvider->stop();
 }
 
-void SkinSelector::onInputNewLine(QByteArray data)
+void SkinSelector::on_changeSourceButton_clicked()
 {
-    snesClassicDecoder->decodeHexdump(data);
+    if (inputSelector->exec())
+    {
+        inputProvider = inputSelector->currentProvider();
+        ui->sourceLabel->setText(QString("<b>%1</b>").arg(inputProvider->name()));
+    }
 }
 
+
+void SkinSelector::on_configHSButton_clicked()
+{
+    static bool hide = true;
+    return ;
+
+    if (hide)
+        ui->configFrame->hide();
+    else
+        ui->configFrame->show();
+    hide = !hide;
+}

@@ -24,6 +24,11 @@ public:
     };
     Q_ENUM(SNESButton)
     explicit InputProvider(QObject *parent = nullptr);
+    virtual void     start() = 0;
+    virtual void     stop() = 0;
+    virtual bool     isReady() = 0;
+    virtual QString  statusText() = 0;
+    virtual QString  name() = 0;
 
 signals:
     void    buttonPressed(InputProvider::SNESButton but);

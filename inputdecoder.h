@@ -4,7 +4,7 @@
 
 #include <QObject>
 #include <QMap>
-#include <inputprovider.h>
+#include "inputprovider.h"
 
 struct RawInputEvent
 {
@@ -16,7 +16,7 @@ struct RawInputEvent
 };
 
 
-class InputDecoder : public InputProvider
+class InputDecoder : public QObject
 {
     Q_OBJECT
 public:
@@ -25,6 +25,10 @@ public:
 public slots:
     void    decodeHexdump(QString toDecode);
     void    decodeBinary(QByteArray toDecode);
+
+signals:
+    void    buttonPressed(InputProvider::SNESButton but);
+    void    buttonReleased(InputProvider::SNESButton but);
 
 private:
     void processEvent(RawInputEvent ev);

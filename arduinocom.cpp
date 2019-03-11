@@ -1,40 +1,42 @@
 #include <QDebug>
 #include "arduinocom.h"
 
-ArduinoCOM::ArduinoCOM(QString port, QObject *parent) : QObject(parent)
+ArduinoCOM::ArduinoCOM(QString port, QObject *parent)
 {
     comPort.setPortName(port);
     connect(&comPort, &QSerialPort::readyRead, this, &ArduinoCOM::portReadyRead);
-    qDebug() << "opening port connection" << comPort.open(QIODevice::ReadWrite);
-    comPort.clear();
-    comPort.setBaudRate(115200);
-    comPort.setDataTerminalReady(true);
-    qDebug() << "BaudRate : " << comPort.baudRate();
-    qDebug() << "Databits : " << comPort.dataBits();
-    qDebug() << "DataTerminalReady : " << comPort.isDataTerminalReady();
-    qDebug() << "Parity : " << comPort.parity();
-    qDebug() << "FlowControl : " << comPort.flowControl();
-    qDebug() << "Stop bits : " << comPort.stopBits();
+
     packetSize = 3;
     buttonState = 0;
     configurePacket();
+    m_type = NintendoSpy;
 }
 
 void ArduinoCOM::configurePacket()
 {
-    maskToButton[0x0001] = InputDecoder::SNESButton::A;
-    maskToButton[0x0100] = InputDecoder::SNESButton::B;
-    maskToButton[0x0002] = InputDecoder::SNESButton::X;
-    maskToButton[0x0200] = InputDecoder::SNESButton::Y;
-    maskToButton[0x0800] = InputDecoder::SNESButton::Start;
-    maskToButton[0x0400] = InputDecoder::SNESButton::Select;
-    maskToButton[0x0004] = InputDecoder::SNESButton::L;
-    maskToButton[0x0008] = InputDecoder::SNESButton::R;
-    maskToButton[0x4000] = InputDecoder::SNESButton::Left;
-    maskToButton[0x8000] = InputDecoder::SNESButton::Right;
-    maskToButton[0x1000] = InputDecoder::SNESButton::Up;
-    maskToButton[0x2000] = InputDecoder::SNESButton::Down;
+    maskToButton[0x0001] = InputProvider::SNESButton::A;
+    maskToButton[0x0100] = InputProvider::SNESButton::B;
+    maskToButton[0x0002] = InputProvider::SNESButton::X;
+    maskToButton[0x0200] = InputProvider::SNESButton::Y;
+    maskToButton[0x0800] = InputProvider::SNESButton::Start;
+    maskToButton[0x0400] = InputProvider::SNESButton::Select;
+    maskToButton[0x0004] = InputProvider::SNESButton::L;
+    maskToButton[0x0008] = InputProvider::SNESButton::R;
+    maskToButton[0x4000] = InputProvider::SNESButton::Left;
+    maskToButton[0x8000] = InputProvider::SNESButton::Right;
+    maskToButton[0x1000] = InputProvider::SNESButton::Up;
+    maskToButton[0x2000] = InputProvider::SNESButton::Down;
 
+}
+
+void ArduinoCOM::setPort(QString port)
+{
+    comPort.setPortName(port);
+}
+
+void ArduinoCOM::setType(int type)
+{
+    m_type = type;
 }
 
 /* FDFF = Y pressed 1111 1101
@@ -59,14 +61,37 @@ XXXE xor 0001 = FFF0
  */
 
 
+void    ArduinoCOM::processNintendoSpy(QByteArray data)
+{
+    qDebug() << "BLOCK" << data.toHex();
+}
+
+// Blue, .,  Red, , Yellow,
+
 
 void ArduinoCOM::portReadyRead()
 {
     static QByteArray dataRead;
     QByteArray data = comPort.readAll();
+    dataRead.append(data);
+    qDebug() << "Received " << data.size();
+    if (m_type == Type::NintendoSpy)
+    {
+        while (!dataRead.isEmpty())
+        {
+            //qDebug() << dataRead.toHex();
+            int nextSplit = dataRead.indexOf('\n');
+            if (nextSplit == -1)
+                break;
+            qDebug() << nextSplit;
+            processNintendoSpy(dataRead.left(nextSplit));
+            dataRead.remove(0, nextSplit + 1);
+        }
+    }
+    return ;
     if (data.size() > packetSize)
         return;
-    dataRead.append(data);
+
     if (dataRead.size() == packetSize)
     {
         /*if (dataRead != QByteArray::fromHex("FFFFFF"))
@@ -74,7 +99,7 @@ void ArduinoCOM::portReadyRead()
         quint16 byte2 = ((uchar)dataRead.at(0) << 8) | (uchar)(dataRead.at(1));
         byte2 = ~byte2;
         //qDebug() << dataRead << QString::number(byte2, 16);
-        QMapIterator<quint16, InputDecoder::SNESButton> it(maskToButton);
+        QMapIterator<quint16, InputProvider::SNESButton> it(maskToButton);
         //qDebug() << QString::number(buttonState, 16);
         while (it.hasNext())
         {
@@ -100,4 +125,39 @@ void ArduinoCOM::portReadyRead()
         }
         dataRead.clear();
     }
+}
+
+
+void ArduinoCOM::start()
+{
+    qDebug() << "opening port connection" << comPort.open(QIODevice::ReadWrite);
+    comPort.clear();
+    comPort.setBaudRate(115200);
+    comPort.setDataTerminalReady(true);
+    qDebug() << "BaudRate : " << comPort.baudRate();
+    qDebug() << "Databits : " << comPort.dataBits();
+    qDebug() << "DataTerminalReady : " << comPort.isDataTerminalReady();
+    qDebug() << "Parity : " << comPort.parity();
+    qDebug() << "FlowControl : " << comPort.flowControl();
+    qDebug() << "Stop bits : " << comPort.stopBits();
+}
+
+void ArduinoCOM::stop()
+{
+    comPort.close();
+}
+
+bool ArduinoCOM::isReady()
+{
+    return true;
+}
+
+QString ArduinoCOM::statusText()
+{
+    return "Ready";
+}
+
+QString ArduinoCOM::name()
+{
+    return "Arduino " + comPort.portName();
 }

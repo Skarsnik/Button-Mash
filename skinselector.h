@@ -3,8 +3,9 @@
 
 #include "inputdisplay.h"
 #include "skinparser.h"
-#include "../telnetconnection.h"
-#include "../inputdecoder.h"
+#include "telnetconnection.h"
+#include "inputdecoder.h"
+#include "inputsourceselector.h"
 
 #include <QListView>
 #include <QMainWindow>
@@ -30,29 +31,30 @@ private slots:
 
     void on_skinListView_clicked(const QModelIndex &index);
 
-    void    onTelnetConnected();
     void    onTimerTimeout();
 
     void on_skinPathButton_clicked();
 
     void on_subSkinListView_clicked(const QModelIndex &index);
 
-    void    onInputConnected();
     void    onDisplayClosed();
 
-    void onInputNewLine(QByteArray data);
+    void on_changeSourceButton_clicked();
+
+
+    void on_configHSButton_clicked();
+
 private:
     Ui::SkinSelector *ui;
     QStandardItemModel* listModel;
     QStandardItemModel* pianoModel;
     QStandardItemModel* subSkinModel;
     InputDisplay*       display;
-    InputDecoder*       snesClassicDecoder;
-    TelnetConnection*   testCo;
-    TelnetConnection*   inputCo;
+    InputProvider*      inputProvider;
     QTimer              timer;
     QSettings*          m_settings;
     RegularSkin         currentSkin;
+    InputSourceSelector* inputSelector;
 
     void    setSkinPath(QString path);
     void    setPreviewScene(const RegularSkin &skin);

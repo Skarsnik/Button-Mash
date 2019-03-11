@@ -10,12 +10,15 @@
 #include <dinput.h>
 
 InputSourceSelector::InputSourceSelector(QWidget *parent) :
-    QWidget(parent),
+    QDialog(parent),
     ui(new Ui::InputSourceSelector)
 {
     ui->setupUi(this);
     QLoggingCategory::setFilterRules(QStringLiteral("qt.gamepad.debug=true"));
     usb2snes = nullptr;
+    snesClassicTelnet = nullptr;
+    arduinoCom = nullptr;
+    connect(ui->sourceRadioGroup, SIGNAL(buttonClicked(QAbstractButton*)), this, SLOT(onSourceButtonClicked(QAbstractButton *)));
 }
 
 InputSourceSelector::~InputSourceSelector()
@@ -23,21 +26,38 @@ InputSourceSelector::~InputSourceSelector()
     delete ui;
 }
 
+InputProvider *InputSourceSelector::currentProvider()
+{
+    return m_currentProvider;
+}
+
+InputProvider *InputSourceSelector::getLastProvider(QSettings* settings)
+{
+    /*if (!settings->contains("inputSource"))
+        return nullptr;*/
+    //TODO
+    /*snesClassicTelnet = new SNESClassicTelnet();
+    ui->snesClassicRadioButton->setChecked(true);*/
+    arduinoCom = new ArduinoCOM("COM6");
+    return arduinoCom;
+}
+
 void InputSourceSelector::scanDevices()
 {
     if (usb2snes == nullptr)
         usb2snes = new USB2snes(false);
     QList<QSerialPortInfo> infos = QSerialPortInfo::availablePorts();
+    foreach (QSerialPortInfo pfi, infos)
+    {
+        qDebug() << pfi.description() << pfi.portName();
+    }
+
     if (!infos.isEmpty())
         setArduinoInfo();
     auto gamepads = QGamepadManager::instance()->connectedGamepads();
     qDebug() << "Gamepads : " << gamepads.size();
-    if (!gamepads.isEmpty())
-        setXInputDevices();
-    foreach (QSerialPortInfo pInfo, infos)
-    {
-        qDebug() << pInfo.portName() << pInfo.description() << pInfo.serialNumber() << pInfo.manufacturer();
-    }
+    /*if (!gamepads.isEmpty())
+        setXInputDevices();*/
     QTcpSocket  testSocket;
     testSocket.connectToHost("169.254.13.37", 23);
     if (testSocket.waitForConnected(50))
@@ -84,6 +104,8 @@ void InputSourceSelector::setArduinoInfo()
     ui->arduinoComComboBox->setEnabled(true);
     ui->arduinoPortLabel->setEnabled(true);
     ui->arduinoRadioButton->setEnabled(true);
+    ui->arduiType1Radio->setEnabled(true);
+    ui->arduiType2Radio->setEnabled(true);
     QList<QSerialPortInfo> infos = QSerialPortInfo::availablePorts();
     foreach (QSerialPortInfo info, infos)
     {
@@ -104,4 +126,48 @@ void InputSourceSelector::setXInputDevices()
         qDebug() << QGamepadManager::instance()->gamepadName(id);
         ui->xinputComboBox->addItem(QString("Placeholder name %1").arg(id));
     }
+}
+
+void InputSourceSelector::on_buttonBox_accepted()
+{
+    accept();
+}
+
+void InputSourceSelector::on_buttonBox_rejected()
+{
+    reject();
+}
+
+
+int InputSourceSelector::exec()
+{
+    scanDevices();
+    return QDialog::exec();
+}
+
+void InputSourceSelector::on_refreshButton_clicked()
+{
+    scanDevices();
+}
+
+void InputSourceSelector::onSourceButtonClicked(QAbstractButton *but)
+{
+    if (but == ui->snesClassicRadioButton)
+    {
+        if (snesClassicTelnet == nullptr)
+            snesClassicTelnet = new SNESClassicTelnet();
+        m_currentProvider = snesClassicTelnet;
+    }
+    if (but == ui->arduinoRadioButton)
+    {
+        if (arduinoCom == nullptr)
+            arduinoCom = new ArduinoCOM(ui->arduinoComComboBox->currentText());
+        m_currentProvider = arduinoCom;
+    }
+}
+
+void InputSourceSelector::on_arduinoComComboBox_currentIndexChanged(const QString &arg1)
+{
+    if (arduinoCom != nullptr)
+        arduinoCom->setPort(arg1);
 }

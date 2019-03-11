@@ -76,8 +76,8 @@ InputDisplay::InputDisplay(RegularSkin skin, PianoSkin pSkin, QWidget *parent) :
 void InputDisplay::setInputProvider(InputProvider *inp)
 {
     inputProvider = inp;
-    connect(inputProvider, &InputProvider::buttonPressed, this, &InputDisplay::onButtonPressed);
-    connect(inputProvider, &InputProvider::buttonReleased, this, &InputDisplay::onButtonReleased);
+    connect(inputProvider, &InputProvider::buttonPressed, this, &InputDisplay::onButtonPressed, Qt::UniqueConnection);
+    connect(inputProvider, &InputProvider::buttonReleased, this, &InputDisplay::onButtonReleased, Qt::UniqueConnection);
 
 }
 

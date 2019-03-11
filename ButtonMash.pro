@@ -8,7 +8,7 @@ QT       += core gui network xml serialport gamepad websockets
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = InputDisplay
+TARGET = ButtonMash
 TEMPLATE = app
 
 # The following define makes your compiler emit warnings if you use
@@ -26,34 +26,39 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         main.cpp \
         skinselector.cpp \
-        ../inputdecoder.cpp \
-        ../telnetconnection.cpp \
-    inputdisplay.cpp \
-    skinparser.cpp \
-    arduinocom.cpp \
-    inputprovider.cpp \
-    inputsourceselector.cpp \
-    qgamepadsource.cpp \
-    mapbuttondialog.cpp \
-    usb2snessource.cpp \
-    usb2snes.cpp
+        inputdecoder.cpp \
+        telnetconnection.cpp \
+        inputdisplay.cpp \
+        skinparser.cpp \
+        arduinocom.cpp \
+        inputprovider.cpp \
+        inputsourceselector.cpp \
+        qgamepadsource.cpp \
+        mapbuttondialog.cpp \
+        usb2snessource.cpp \
+        usb2snes.cpp \
+    snesclassictelnet.cpp
 
 HEADERS += \
         skinselector.h \
-        ../inputdecoder.h \
-        ../telnetconnection.h \
-    inputdisplay.h \
-    skinparser.h \
-    arduinocom.h \
-    inputprovider.h \
-    inputsourceselector.h \
-    qgamepadsource.h \
-    mapbuttondialog.h \
-    usb2snessource.h \
-    usb2snes.h
+        inputdecoder.h \
+        telnetconnection.h \
+        inputdisplay.h \
+        skinparser.h \
+        arduinocom.h \
+        inputprovider.h \
+        inputsourceselector.h \
+        qgamepadsource.h \
+        mapbuttondialog.h \
+        usb2snessource.h \
+        usb2snes.h \
+    snesclassictelnet.h
 
 FORMS += \
         skinselector.ui \
-    inputdisplay.ui \
-    inputsourceselector.ui \
-    mapbuttondialog.ui
+        inputdisplay.ui \
+        inputsourceselector.ui \
+        mapbuttondialog.ui
+
+RC_FILE += \
+    buttonmash.rc
