@@ -78,7 +78,7 @@ void InputDisplay::setInputProvider(InputProvider *inp)
     inputProvider = inp;
     connect(inputProvider, &InputProvider::buttonPressed, this, &InputDisplay::onButtonPressed, Qt::UniqueConnection);
     connect(inputProvider, &InputProvider::buttonReleased, this, &InputDisplay::onButtonReleased, Qt::UniqueConnection);
-
+    connect(inputProvider, &InputProvider::unReady, this, &InputDisplay::close);
 }
 
 void    InputDisplay::configPianoDisplay(PianoSkin pSkin)

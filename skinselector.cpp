@@ -224,8 +224,8 @@ void SkinSelector::onTimerTimeout()
     }
     if (display != nullptr && display->isVisible())
         return ;
-    ui->statusLabel->setText(inputProvider->statusText());
     ui->startButton->setEnabled(inputProvider->isReady());
+    ui->statusLabel->setText(inputProvider->statusText());
 }
 
 void SkinSelector::on_skinPathButton_clicked()

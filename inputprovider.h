@@ -33,6 +33,7 @@ public:
 signals:
     void    buttonPressed(InputProvider::SNESButton but);
     void    buttonReleased(InputProvider::SNESButton but);
+    void    unReady();
 
 public slots:
 };

@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QSerialPort>
 #include <QMap>
+#include <QVector>
 #include "inputprovider.h"
 
 
@@ -30,6 +31,8 @@ private:
     QSerialPort comPort;
     QMap<quint16, InputProvider::SNESButton>  maskToButton;
     quint8      packetSize;
+    QVector<InputProvider::SNESButton> nintendoSpyButtons;
+    QVector<char>   NSButtonState;
     quint16     buttonState;
     int         m_type;
     void        processNintendoSpy(QByteArray data);

@@ -9,6 +9,7 @@ SNESClassicTelnet::SNESClassicTelnet()
     decoder = new InputDecoder();
     connect(decoder, &InputDecoder::buttonPressed, this, &SNESClassicTelnet::buttonPressed);
     connect(decoder, &InputDecoder::buttonReleased, this, &SNESClassicTelnet::buttonReleased);
+    connect(controlCo, &TelnetConnection::disconnected, this, &SNESClassicTelnet::unReady);
 }
 
 
@@ -31,7 +32,9 @@ void SNESClassicTelnet::stop()
 
 bool SNESClassicTelnet::isReady()
 {
-    return controlCo->state() == TelnetConnection::Connected;
+    if (controlCo->state() == TelnetConnection::Offline)
+       controlCo->conneect();
+    return controlCo->state() == TelnetConnection::Connected || controlCo->state() == TelnetConnection::Ready;
 }
 
 QString SNESClassicTelnet::name()

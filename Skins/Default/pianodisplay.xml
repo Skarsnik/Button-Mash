@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<skin name="default" author="Skarsnik" type="pianodisplay">
+<mainarea backgroundcolor="black" width="400" height="200">
+    <button name="left" x="10" width="20" color="gray"/>
+    <button name="up" x="40" width="20" color="gray"/>
+    <button name="right" x="70" width="20" color="gray"/>
+    <button name="down" x="100" width="20" color="gray"/>
+    <button name="select" x="130" width="20" color="lightgray"/>
+    <button name="start" x="160" width="20" color="lightgray"/>
+    <button name="y" x="190" width="20" color="green"/>
+    <button name="b" x="220" width="20" color="yellow"/>
+    <button name="x" x="250" width="20" color="blue"/>
+    <button name="a" x="280" width="20" color="red"/>
+    <button name="l" x="310" width="20" color="gray"/>
+    <button name="r" x="340" width="20" color="gray"/>
+</mainarea>
+<labelarea background-color="black" width="400" height="30">
+    <font name="DejaVu Sans Mono" bold="1" size="12"/>
+</labelarea>
+
+</skin>

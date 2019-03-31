@@ -36,10 +36,11 @@ InputProvider *InputSourceSelector::getLastProvider(QSettings* settings)
     /*if (!settings->contains("inputSource"))
         return nullptr;*/
     //TODO
-    /*snesClassicTelnet = new SNESClassicTelnet();
-    ui->snesClassicRadioButton->setChecked(true);*/
-    arduinoCom = new ArduinoCOM("COM6");
-    return arduinoCom;
+    snesClassicTelnet = new SNESClassicTelnet();
+    ui->snesClassicRadioButton->setChecked(true);
+    //arduinoCom = new ArduinoCOM("COM6");
+    //return arduinoCom;
+    return snesClassicTelnet;
 }
 
 void InputSourceSelector::scanDevices()

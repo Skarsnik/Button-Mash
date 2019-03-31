@@ -27,6 +27,9 @@ void ArduinoCOM::configurePacket()
     maskToButton[0x1000] = InputProvider::SNESButton::Up;
     maskToButton[0x2000] = InputProvider::SNESButton::Down;
 
+//"b", "y", "select", "start", "up", "down", "left", "right", "a", "x", "l", "r", null, null, null, null
+    nintendoSpyButtons = {B, Y, Select, Start, Up, Down, Left, Right, A, X, L, R};
+    NSButtonState.fill(0, 12);
 }
 
 void ArduinoCOM::setPort(QString port)
@@ -64,6 +67,20 @@ XXXE xor 0001 = FFF0
 void    ArduinoCOM::processNintendoSpy(QByteArray data)
 {
     qDebug() << "BLOCK" << data.toHex();
+    if (data.size() < 12)
+        return ;
+    for (int i = 0; i < 12; i++)
+    {
+        if (data.at(i) != NSButtonState.at(i))
+        {
+            if (data.at(i) == 0x00)
+                emit buttonReleased(nintendoSpyButtons.at(i));
+            else {
+                emit buttonPressed(nintendoSpyButtons.at(i));
+            }
+        }
+        NSButtonState[i] = data.at(i);
+    }
 }
 
 // Blue, .,  Red, , Yellow,
@@ -79,7 +96,7 @@ void ArduinoCOM::portReadyRead()
     {
         while (!dataRead.isEmpty())
         {
-            //qDebug() << dataRead.toHex();
+            qDebug() << dataRead.toHex();
             int nextSplit = dataRead.indexOf('\n');
             if (nextSplit == -1)
                 break;
