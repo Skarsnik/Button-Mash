@@ -16,6 +16,7 @@ public:
     void    configurePacket();
     void    setPort(QString port);
     void    setType(int type);
+    QString port() const;
 
 public slots:
 

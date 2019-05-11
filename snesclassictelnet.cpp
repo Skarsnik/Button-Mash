@@ -44,7 +44,7 @@ QString SNESClassicTelnet::name()
 
 QString SNESClassicTelnet::statusText()
 {
-    if (controlCo->state() != TelnetConnection::Connected)
+    if (controlCo->state() != TelnetConnection::Connected && controlCo->state() != TelnetConnection::Ready)
     {
         return tr("Not connected to SNES Classic, be sure it's moded with hakchi2CE");
     } else {

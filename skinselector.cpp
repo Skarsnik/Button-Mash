@@ -11,6 +11,8 @@
 #include <QDir>
 #include <QStandardItemModel>
 
+QSettings* globalSetting;
+
 SkinSelector::SkinSelector(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::SkinSelector)
@@ -22,10 +24,10 @@ SkinSelector::SkinSelector(QWidget *parent) :
     ui->subSkinListView->setModel(subSkinModel);
     pianoModel = new QStandardItemModel();
     ui->pianoSkinListView->setModel(pianoModel);
-    m_settings = new QSettings("skarsnik.nyo.fr", "InputDisplay");
-    if (m_settings->contains("skinFolder"))
+    globalSetting = new QSettings("skarsnik.nyo.fr", "InputDisplay");
+    if (globalSetting->contains("skinFolder"))
     {
-        setSkinPath(m_settings->value("skinFolder").toString());
+        setSkinPath(globalSetting->value("skinFolder").toString());
     } else {
         setSkinPath(qApp->applicationDirPath() + "/Skins");
     }
@@ -67,7 +69,7 @@ void    SkinSelector::restoreLastSkin()
     for (unsigned int i = 0; i < listModel->rowCount(); i++)
     {
         const RegularSkin& sk = listModel->item(i)->data(Qt::UserRole + 2).value<RegularSkin>();
-        if (sk.file == m_settings->value("lastSkin/regularSkinPath").toString())
+        if (sk.file == globalSetting->value("lastSkin/regularSkinPath").toString())
         {
             ui->skinListView->setCurrentIndex(listModel->item(i)->index());
             on_skinListView_clicked(listModel->item(i)->index());
@@ -75,11 +77,11 @@ void    SkinSelector::restoreLastSkin()
             if (!sk.subSkins.isEmpty())
             {
                 unsigned int j = 0;
-                qDebug() << "Sub skin" << m_settings->value("lastSkin/regularSubSkin").toString();
+                qDebug() << "Sub skin" << globalSetting->value("lastSkin/regularSubSkin").toString();
                 foreach(RegularSkin ssk, sk.subSkins)
                 {
                     qDebug() << ssk.name;
-                    if (ssk.name == m_settings->value("lastSkin/regularSubSkin").toString())
+                    if (ssk.name == globalSetting->value("lastSkin/regularSubSkin").toString())
                     {
                         ui->subSkinListView->setCurrentIndex(subSkinModel->item(j)->index());
                         qDebug() << "Crash is here?";
@@ -94,14 +96,14 @@ void    SkinSelector::restoreLastSkin()
         }
     }
     //Piano Display
-    qDebug() << "Piano Display" << m_settings->value("lastSkin/pianoDisplay");
-    if (!m_settings->value("lastSkin/pianoDisplay").toBool())
+    qDebug() << "Piano Display" << globalSetting->value("lastSkin/pianoDisplay");
+    if (!globalSetting->value("lastSkin/pianoDisplay").toBool())
         return;
     ui->pianoCheckBox->setChecked(true);
     for (unsigned int i = 0; i < pianoModel->rowCount(); i++)
     {
         const PianoSkin& sk = pianoModel->item(i)->data(Qt::UserRole + 2).value<PianoSkin>();
-        if (sk.file == m_settings->value("lastSkin/pianSkinPath").toString())
+        if (sk.file == globalSetting->value("lastSkin/pianoSkinPath").toString())
         {
             ui->pianoSkinListView->setCurrentIndex(pianoModel->item(i)->index());
             break;
@@ -111,17 +113,17 @@ void    SkinSelector::restoreLastSkin()
 
 void    SkinSelector::saveSkinStarted()
 {
-    m_settings->setValue("lastSkin/pianoDisplay", ui->pianoCheckBox->isChecked());
-    m_settings->setValue("lastSkin/regularSkinPath", currentSkin.file);
-    m_settings->setValue("lastSkin/pianoSkinPath", pianoModel->itemFromIndex(
+    globalSetting->setValue("lastSkin/pianoDisplay", ui->pianoCheckBox->isChecked());
+    globalSetting->setValue("lastSkin/regularSkinPath", currentSkin.file);
+    globalSetting->setValue("lastSkin/pianoSkinPath", pianoModel->itemFromIndex(
                              ui->pianoSkinListView->currentIndex())->data(Qt::UserRole + 2).value<PianoSkin>().file);
-    m_settings->setValue("lastSkin/regularSubSkin", currentSkin.name);
+    globalSetting->setValue("lastSkin/regularSubSkin", currentSkin.name);
 
 }
 
 void    SkinSelector::setSkinPath(QString path)
 {
-    m_settings->setValue("skinFolder", path);
+    globalSetting->setValue("skinFolder", path);
     ui->skinPathEdit->setText(path);
     QDir dir(path);
     dir.setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
@@ -215,7 +217,7 @@ void SkinSelector::onTimerTimeout()
         first = false;
         timer.setInterval(1000);
         restoreLastSkin();
-        inputProvider = inputSelector->getLastProvider(m_settings);
+        inputProvider = inputSelector->getLastProvider();
         if (inputProvider != nullptr)
             ui->sourceLabel->setText(QString("<b>%1</b>").arg(inputProvider->name()));
         else

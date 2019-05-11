@@ -22,7 +22,7 @@ public:
     explicit InputSourceSelector(QWidget *parent = nullptr);
     ~InputSourceSelector();
     InputProvider*  currentProvider();
-    InputProvider*  getLastProvider(QSettings *settings);
+    InputProvider*  getLastProvider();
     void    scanDevices();
 
 

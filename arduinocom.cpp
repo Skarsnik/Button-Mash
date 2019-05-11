@@ -5,7 +5,7 @@ ArduinoCOM::ArduinoCOM(QString port, QObject *parent)
 {
     comPort.setPortName(port);
     connect(&comPort, &QSerialPort::readyRead, this, &ArduinoCOM::portReadyRead);
-
+    qDebug() << "Creating arduino com, port " << port << comPort.portName();
     packetSize = 3;
     buttonState = 0;
     configurePacket();
@@ -34,12 +34,18 @@ void ArduinoCOM::configurePacket()
 
 void ArduinoCOM::setPort(QString port)
 {
+    qDebug() << "Set port to " << port;
     comPort.setPortName(port);
 }
 
 void ArduinoCOM::setType(int type)
 {
     m_type = type;
+}
+
+QString ArduinoCOM::port() const
+{
+    return comPort.portName();
 }
 
 /* FDFF = Y pressed 1111 1101
@@ -66,7 +72,7 @@ XXXE xor 0001 = FFF0
 
 void    ArduinoCOM::processNintendoSpy(QByteArray data)
 {
-    qDebug() << "BLOCK" << data.toHex();
+    //qDebug() << "BLOCK" << data.toHex();
     if (data.size() < 12)
         return ;
     for (int i = 0; i < 12; i++)
@@ -91,16 +97,16 @@ void ArduinoCOM::portReadyRead()
     static QByteArray dataRead;
     QByteArray data = comPort.readAll();
     dataRead.append(data);
-    qDebug() << "Received " << data.size();
+    //qDebug() << "Received " << data.size();
     if (m_type == Type::NintendoSpy)
     {
         while (!dataRead.isEmpty())
         {
-            qDebug() << dataRead.toHex();
+            //qDebug() << dataRead.toHex();
             int nextSplit = dataRead.indexOf('\n');
             if (nextSplit == -1)
                 break;
-            qDebug() << nextSplit;
+            //qDebug() << nextSplit;
             processNintendoSpy(dataRead.left(nextSplit));
             dataRead.remove(0, nextSplit + 1);
         }
@@ -176,5 +182,5 @@ QString ArduinoCOM::statusText()
 
 QString ArduinoCOM::name()
 {
-    return "Arduino " + comPort.portName();
+    return "Arduino on " + comPort.portName();
 }

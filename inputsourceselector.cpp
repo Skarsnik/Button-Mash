@@ -9,6 +9,15 @@
 #include <QLoggingCategory>
 #include <dinput.h>
 
+extern QSettings* globalSetting;
+
+const QString SETTING_INPUTSOURCE = "inputSource/inputSource";
+const QString SETTING_SNESCLASSIC_TELNET = "SnesClassicTelnet";
+const QString SETTING_SNESCLASSIC_STUFF = "SnesClassicStuff";
+const QString SETTING_ARDUINO = "Arduino";
+const QString SETTING_ARDUINOCOM = "ArduinoCOM";
+const QString SETTING_DIRECT_INPUT = "DirectInput";
+
 InputSourceSelector::InputSourceSelector(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::InputSourceSelector)
@@ -31,16 +40,36 @@ InputProvider *InputSourceSelector::currentProvider()
     return m_currentProvider;
 }
 
-InputProvider *InputSourceSelector::getLastProvider(QSettings* settings)
+InputProvider *InputSourceSelector::getLastProvider()
 {
-    /*if (!settings->contains("inputSource"))
-        return nullptr;*/
-    //TODO
-    snesClassicTelnet = new SNESClassicTelnet();
-    ui->snesClassicRadioButton->setChecked(true);
+    InputProvider* toret = nullptr;
+    if (globalSetting->contains(SETTING_INPUTSOURCE))
+    {
+        QString inputSource = globalSetting->value(SETTING_INPUTSOURCE).toString();
+        if (inputSource == SETTING_SNESCLASSIC_TELNET)
+        {
+            snesClassicTelnet = new SNESClassicTelnet();
+            ui->snesClassicRadioButton->setChecked(true);
+            m_currentProvider = snesClassicTelnet;
+            return snesClassicTelnet;
+        }
+        if (inputSource == SETTING_ARDUINO)
+        {
+            arduinoCom = new ArduinoCOM(globalSetting->value("inputSource/" + SETTING_ARDUINOCOM).toString());
+            ui->arduinoRadioButton->setChecked(true);
+            qDebug() << "Using Arduino" << arduinoCom->port();
+            m_currentProvider = arduinoCom;
+            return arduinoCom;
+        }
+    } else {
+        snesClassicTelnet = new SNESClassicTelnet();
+        ui->snesClassicRadioButton->setChecked(true);
+        m_currentProvider = snesClassicTelnet;
+        toret = snesClassicTelnet;
+    }
     //arduinoCom = new ArduinoCOM("COM6");
     //return arduinoCom;
-    return snesClassicTelnet;
+    return toret;
 }
 
 void InputSourceSelector::scanDevices()
@@ -64,9 +93,9 @@ void InputSourceSelector::scanDevices()
     if (testSocket.waitForConnected(50))
         activateSnesClassicTelnet();
     testSocket.close();
-    testSocket.connectToHost("169.254.13.37", 1042);
+    /*testSocket.connectToHost("169.254.13.37", 1042);
     if (testSocket.waitForConnected(50))
-        activateSnesClassicStuff();
+        activateSnesClassicStuff();*/
     testSocket.close();
     testSocket.connectToHost("localhost", 8080);
     if (testSocket.waitForConnected(50))
@@ -101,17 +130,46 @@ void InputSourceSelector::activateUsb2SnesStuff()
 
 void InputSourceSelector::setArduinoInfo()
 {
+    ui->arduinoComComboBox->blockSignals(true);
     ui->arduinoComComboBox->clear();
     ui->arduinoComComboBox->setEnabled(true);
     ui->arduinoPortLabel->setEnabled(true);
     ui->arduinoRadioButton->setEnabled(true);
     ui->arduiType1Radio->setEnabled(true);
-    ui->arduiType2Radio->setEnabled(true);
+    ui->arduiType1Radio->setChecked(true);
+    //ui->arduiType2Radio->setEnabled(true);
     QList<QSerialPortInfo> infos = QSerialPortInfo::availablePorts();
+    unsigned int i = 0;
+    int index_arduino = -1;
     foreach (QSerialPortInfo info, infos)
     {
-        ui->arduinoComComboBox->addItem(info.portName());
+        if (info.description().indexOf("Arduino") != -1)
+        {
+            ui->arduinoComComboBox->addItem(info.portName() + " - " + info.description());
+            index_arduino = i;
+        } else {
+            ui->arduinoComComboBox->addItem(info.portName());
+        }
+        ui->arduinoComComboBox->setItemData(i, info.portName(), Qt::UserRole + 1);
+        i++;
     }
+    if (arduinoCom != nullptr)
+    {
+        qDebug() << arduinoCom->port();
+        unsigned int idx;
+        for (idx = 0; idx < ui->arduinoComComboBox->count(); idx++)
+        {
+            qDebug() << idx << ui->arduinoComComboBox->itemData(idx, Qt::UserRole + 1).toString();
+            if (ui->arduinoComComboBox->itemData(idx, Qt::UserRole + 1).toString() == arduinoCom->port())
+                break;
+        }
+        qDebug() << "Found at : " << idx;
+        ui->arduinoComComboBox->setCurrentIndex(idx);
+    } else {
+        if (index_arduino != -1)
+            ui->arduinoComComboBox->setCurrentIndex(index_arduino);
+    }
+    ui->arduinoComComboBox->blockSignals(false);
 }
 
 void InputSourceSelector::setXInputDevices()
@@ -131,6 +189,15 @@ void InputSourceSelector::setXInputDevices()
 
 void InputSourceSelector::on_buttonBox_accepted()
 {
+    if (ui->snesClassicRadioButton->isChecked())
+        globalSetting->setValue(SETTING_INPUTSOURCE, SETTING_SNESCLASSIC_TELNET);
+    if (ui->snesClassicStuffRadioButton->isChecked())
+        globalSetting->setValue(SETTING_INPUTSOURCE, SETTING_SNESCLASSIC_STUFF);
+    if (ui->arduinoRadioButton->isChecked())
+    {
+        globalSetting->setValue(SETTING_INPUTSOURCE, SETTING_ARDUINO);
+        globalSetting->setValue("inputSource/" + SETTING_ARDUINOCOM, ui->arduinoComComboBox->currentData(Qt::UserRole + 1).toString());
+    }
     accept();
 }
 
@@ -162,7 +229,7 @@ void InputSourceSelector::onSourceButtonClicked(QAbstractButton *but)
     if (but == ui->arduinoRadioButton)
     {
         if (arduinoCom == nullptr)
-            arduinoCom = new ArduinoCOM(ui->arduinoComComboBox->currentText());
+            arduinoCom = new ArduinoCOM(ui->arduinoComComboBox->currentData(Qt::UserRole + 1).toString());
         m_currentProvider = arduinoCom;
     }
 }
@@ -170,5 +237,5 @@ void InputSourceSelector::onSourceButtonClicked(QAbstractButton *but)
 void InputSourceSelector::on_arduinoComComboBox_currentIndexChanged(const QString &arg1)
 {
     if (arduinoCom != nullptr)
-        arduinoCom->setPort(arg1);
+        arduinoCom->setPort(ui->arduinoComComboBox->currentData(Qt::UserRole + 1).toString());
 }

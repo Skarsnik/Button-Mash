@@ -52,7 +52,6 @@ private:
     InputDisplay*       display;
     InputProvider*      inputProvider;
     QTimer              timer;
-    QSettings*          m_settings;
     RegularSkin         currentSkin;
     InputSourceSelector* inputSelector;
 
