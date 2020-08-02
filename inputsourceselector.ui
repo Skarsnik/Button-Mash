@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>387</width>
-    <height>334</height>
+    <width>398</width>
+    <height>339</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -209,7 +209,7 @@
      <property name="title">
       <string>Emulator and special</string>
      </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <layout class="QHBoxLayout" name="horizontalLayout_8">
       <item>
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
@@ -248,24 +248,46 @@
        </spacer>
       </item>
       <item>
-       <widget class="QRadioButton" name="usb2snesRadioButton">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="text">
-         <string>Usb2Snes</string>
-        </property>
-        <attribute name="buttonGroup">
-         <string notr="true">sourceRadioGroup</string>
-        </attribute>
-       </widget>
-      </item>
-      <item>
-       <widget class="QComboBox" name="usb2snesComboBox">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-       </widget>
+       <layout class="QVBoxLayout" name="verticalLayout_5">
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_3">
+          <item>
+           <widget class="QRadioButton" name="usb2snesRadioButton">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Usb2Snes</string>
+            </property>
+            <attribute name="buttonGroup">
+             <string notr="true">sourceRadioGroup</string>
+            </attribute>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="usb2snesComboBox">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_5">
+          <item>
+           <widget class="QLabel" name="usb2gameLabel">
+            <property name="text">
+             <string>Game :</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="usb2gameComboBox"/>
+          </item>
+         </layout>
+        </item>
+       </layout>
       </item>
      </layout>
     </widget>

@@ -233,7 +233,8 @@ void SkinSelector::onTimerTimeout()
 void SkinSelector::on_skinPathButton_clicked()
 {
     QString dir = QFileDialog::getExistingDirectory(this, tr("Choose the default folder for skins"), qApp->applicationDirPath() + "/Skins");
-    setSkinPath(dir);
+    if (!dir.isEmpty())
+        setSkinPath(dir);
 }
 
 void SkinSelector::on_subSkinListView_clicked(const QModelIndex &index)
@@ -252,10 +253,12 @@ void SkinSelector::onDisplayClosed()
 
 void SkinSelector::on_changeSourceButton_clicked()
 {
+    timer.stop();
     if (inputSelector->exec())
     {
         inputProvider = inputSelector->currentProvider();
         ui->sourceLabel->setText(QString("<b>%1</b>").arg(inputProvider->name()));
+        timer.start();
     }
 }
 

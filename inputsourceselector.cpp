@@ -14,6 +14,9 @@ extern QSettings* globalSetting;
 const QString SETTING_INPUTSOURCE = "inputSource/inputSource";
 const QString SETTING_SNESCLASSIC_TELNET = "SnesClassicTelnet";
 const QString SETTING_SNESCLASSIC_STUFF = "SnesClassicStuff";
+const QString SETTING_USB2SNES = "Usb2Snes";
+const QString SETTING_USB2SNES_DEVICE =  "Usb2SnesDevice";
+const QString SETTING_USB2SNES_GAME =  "Usb2SnesGame";
 const QString SETTING_ARDUINO = "Arduino";
 const QString SETTING_ARDUINOCOM = "ArduinoCOM";
 const QString SETTING_DIRECT_INPUT = "DirectInput";
@@ -27,6 +30,7 @@ InputSourceSelector::InputSourceSelector(QWidget *parent) :
     usb2snes = nullptr;
     snesClassicTelnet = nullptr;
     arduinoCom = nullptr;
+    usb2snesProvider = nullptr;
     connect(ui->sourceRadioGroup, SIGNAL(buttonClicked(QAbstractButton*)), this, SLOT(onSourceButtonClicked(QAbstractButton *)));
 }
 
@@ -51,7 +55,6 @@ InputProvider *InputSourceSelector::getLastProvider()
             snesClassicTelnet = new SNESClassicTelnet();
             ui->snesClassicRadioButton->setChecked(true);
             m_currentProvider = snesClassicTelnet;
-            return snesClassicTelnet;
         }
         if (inputSource == SETTING_ARDUINO)
         {
@@ -59,8 +62,18 @@ InputProvider *InputSourceSelector::getLastProvider()
             ui->arduinoRadioButton->setChecked(true);
             qDebug() << "Using Arduino" << arduinoCom->port();
             m_currentProvider = arduinoCom;
-            return arduinoCom;
         }
+        if (inputSource == SETTING_USB2SNES)
+        {
+            usb2snes = new USB2snes(false);
+            usb2snesProvider = new Usb2SnesSource(usb2snes);
+            usb2snesProvider->loadGamesList();
+            usb2snesProvider->setDevice(globalSetting->value("inputSource/" + SETTING_USB2SNES_DEVICE).toString());
+            usb2snesProvider->setGame(globalSetting->value("inputSource/" + SETTING_USB2SNES_GAME).toString());
+            ui->usb2snesRadioButton->setChecked(true);
+            m_currentProvider = usb2snesProvider;
+        }
+        return m_currentProvider;
     } else {
         snesClassicTelnet = new SNESClassicTelnet();
         ui->snesClassicRadioButton->setChecked(true);
@@ -103,15 +116,6 @@ void InputSourceSelector::scanDevices()
     testSocket.close();
 }
 
-void InputSourceSelector::onUsb2SnesConnected()
-{
-    auto devices = usb2snes->deviceList();
-    foreach(QString name, devices)
-    {
-        ui->usb2snesComboBox->addItem(name);
-    }
-}
-
 void InputSourceSelector::activateSnesClassicTelnet()
 {
     ui->snesClassicRadioButton->setEnabled(true);
@@ -124,8 +128,27 @@ void InputSourceSelector::activateSnesClassicStuff()
 
 void InputSourceSelector::activateUsb2SnesStuff()
 {
-    usb2snes->connect();
+    auto gamesList = usb2snesProvider->loadGamesList();
+    foreach (QString game, gamesList)
+    {
+        ui->usb2gameComboBox->addItem(game);
+    }
+    if (usb2snes->state() == USB2snes::None)
+        usb2snes->connect();
+    if (usb2snes->state() == USB2snes::Connected || usb2snes->state() == USB2snes::Ready)
+        onUsb2SnesConnected();
+    connect(usb2snes, &USB2snes::connected, this, &InputSourceSelector::onUsb2SnesConnected, Qt::UniqueConnection);
     ui->usb2snesRadioButton->setEnabled(true);
+}
+
+void InputSourceSelector::onUsb2SnesConnected()
+{
+    auto devices = usb2snes->deviceList();
+    ui->usb2snesComboBox->setEnabled(true);
+    foreach(QString name, devices)
+    {
+        ui->usb2snesComboBox->addItem(name);
+    }
 }
 
 void InputSourceSelector::setArduinoInfo()
@@ -198,6 +221,12 @@ void InputSourceSelector::on_buttonBox_accepted()
         globalSetting->setValue(SETTING_INPUTSOURCE, SETTING_ARDUINO);
         globalSetting->setValue("inputSource/" + SETTING_ARDUINOCOM, ui->arduinoComComboBox->currentData(Qt::UserRole + 1).toString());
     }
+    if (ui->usb2snesRadioButton->isChecked())
+    {
+        globalSetting->setValue(SETTING_INPUTSOURCE, SETTING_USB2SNES);
+        globalSetting->setValue("inputSource/" + SETTING_USB2SNES_DEVICE, ui->usb2snesComboBox->currentText());
+        globalSetting->setValue("inputSource/" + SETTING_USB2SNES_GAME, ui->usb2gameComboBox->currentText());
+    }
     accept();
 }
 
@@ -232,10 +261,27 @@ void InputSourceSelector::onSourceButtonClicked(QAbstractButton *but)
             arduinoCom = new ArduinoCOM(ui->arduinoComComboBox->currentData(Qt::UserRole + 1).toString());
         m_currentProvider = arduinoCom;
     }
+    if (but == ui->usb2snesRadioButton)
+    {
+        if (usb2snesProvider == nullptr)
+            usb2snesProvider = new Usb2SnesSource(usb2snes);
+        m_currentProvider = usb2snesProvider;
+
+    }
 }
 
 void InputSourceSelector::on_arduinoComComboBox_currentIndexChanged(const QString &arg1)
 {
     if (arduinoCom != nullptr)
         arduinoCom->setPort(ui->arduinoComComboBox->currentData(Qt::UserRole + 1).toString());
+}
+
+void InputSourceSelector::on_usb2snesComboBox_currentTextChanged(const QString &arg1)
+{
+    usb2snesProvider->setDevice(arg1);
+}
+
+void InputSourceSelector::on_usb2gameComboBox_currentTextChanged(const QString &arg1)
+{
+    usb2snesProvider->setGame(arg1);
 }

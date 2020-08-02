@@ -87,6 +87,7 @@ void USB2snes::attach(QString deviceName)
 void USB2snes::onWebSocketConnected()
 {
     sDebug() << "Websocket connected";
+    emit connected();
     changeState(Connected);
     m_istate = IConnected;
     if (m_autoAttach)

@@ -94,6 +94,7 @@ public:
 signals:
     void    stateChanged();
     void    disconnected();
+    void    connected();
     void    binaryMessageReceived();
     void    textMessageReceived();
     void    romStarted();

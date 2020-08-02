@@ -9,6 +9,7 @@
 #include "inputprovider.h"
 #include "snesclassictelnet.h"
 #include "usb2snes.h"
+#include "usb2snessource.h"
 
 namespace Ui {
 class InputSourceSelector;
@@ -39,12 +40,17 @@ private slots:
 
     void on_arduinoComComboBox_currentIndexChanged(const QString &arg1);
 
+    void on_usb2snesComboBox_currentTextChanged(const QString &arg1);
+
+    void on_usb2gameComboBox_currentTextChanged(const QString &arg1);
+
 private:
     Ui::InputSourceSelector *ui;
     USB2snes*           usb2snes;
     InputProvider*      m_currentProvider;
     SNESClassicTelnet*  snesClassicTelnet;
     ArduinoCOM*         arduinoCom;
+    Usb2SnesSource*     usb2snesProvider;
 
     void    activateSnesClassicTelnet();
     void    activateSnesClassicStuff();
