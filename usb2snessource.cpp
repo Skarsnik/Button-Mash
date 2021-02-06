@@ -47,7 +47,7 @@ bool Usb2SnesSource::isReady()
     return usb2snes->state() == USB2snes::Ready;
 }
 
-QString Usb2SnesSource::name()
+QString Usb2SnesSource::name() const
 {
     return "Usb2Snes";
 }

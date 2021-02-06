@@ -15,7 +15,7 @@ public:
     void    start();
     void    stop();
     bool    isReady();
-    QString name();
+    QString name() const;
     QString statusText();
     void    setDevice(QString device);
     QStringList    loadGamesList();

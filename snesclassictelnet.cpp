@@ -37,7 +37,7 @@ bool SNESClassicTelnet::isReady()
     return controlCo->state() == TelnetConnection::Connected || controlCo->state() == TelnetConnection::Ready;
 }
 
-QString SNESClassicTelnet::name()
+QString SNESClassicTelnet::name() const
 {
     return "SNES Classic";
 }

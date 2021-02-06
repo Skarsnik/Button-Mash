@@ -28,7 +28,7 @@ public:
     virtual void     stop() = 0;
     virtual bool     isReady() = 0;
     virtual QString  statusText() = 0;
-    virtual QString  name() = 0;
+    virtual QString  name() const = 0;
 
 signals:
     void    buttonPressed(InputProvider::SNESButton but);

@@ -10,10 +10,14 @@
 #include "snesclassictelnet.h"
 #include "usb2snes.h"
 #include "usb2snessource.h"
+#include "qgamepadinputinfos.h"
+#include "qgamepadsource.h"
 
 namespace Ui {
 class InputSourceSelector;
 }
+
+typedef QMap<InputProvider::SNESButton, QGamepadInputInfos> QGamepadMapping;
 
 class InputSourceSelector : public QDialog
 {
@@ -44,6 +48,8 @@ private slots:
 
     void on_usb2gameComboBox_currentTextChanged(const QString &arg1);
 
+    void on_mappingButton_clicked();
+
 private:
     Ui::InputSourceSelector *ui;
     USB2snes*           usb2snes;
@@ -51,12 +57,16 @@ private:
     SNESClassicTelnet*  snesClassicTelnet;
     ArduinoCOM*         arduinoCom;
     Usb2SnesSource*     usb2snesProvider;
+    QGamepadSource*     qgamepadProvider;
+    QGamepadMapping     qgamepadMapping;
 
     void    activateSnesClassicTelnet();
     void    activateSnesClassicStuff();
     void    activateUsb2SnesStuff();
     void    setArduinoInfo();
-    void    setXInputDevices();
+    void    setQGamepads();
+    QGamepadMapping loadQGamepadMapping();
+    void    saveQGamepadMapping(QGamepadMapping map);
 
     // QDialog interface
 public slots:

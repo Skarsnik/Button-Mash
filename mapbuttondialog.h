@@ -1,10 +1,14 @@
 #ifndef MAPBUTTONDIALOG_H
 #define MAPBUTTONDIALOG_H
 
-#include "inputprovider.h"
 
+#include <QAbstractButton>
 #include <QDialog>
 #include <QGamepadManager>
+
+#include "inputprovider.h"
+#include "qgamepadinputinfos.h"
+
 
 namespace Ui {
 class MapButtonDialog;
@@ -16,15 +20,13 @@ class MapButtonDialog : public QDialog
 
 public:
     explicit MapButtonDialog(QWidget *parent = nullptr);
+    void                                                setMapping(QMap<InputProvider::SNESButton, QGamepadInputInfos> mapping);
+    QMap<InputProvider::SNESButton, QGamepadInputInfos> mapping() const;
     ~MapButtonDialog();
-    struct QGamepadInputInfos {
-        QGamepadManager::GamepadButton  button;
-        QGamepadManager::GamepadAxis    axis;
-        double                          value;
-    };
+
 
 private slots:
-    void    on_upButton_clicked();
+    void    onButtonGroupClicked(QAbstractButton* button);
     void    onGamepadButtonPressEvent(int deviceId, QGamepadManager::GamepadButton button, double value);
     void    onGamepadButtonReleaseEvent(int deviceId, QGamepadManager::GamepadButton button);
 
@@ -38,7 +40,7 @@ private:
     InputProvider::SNESButton   butVal;
     bool            setMode;
 
-    QMap<InputProvider::SNESButton, QGamepadInputInfos> mapping;
+    QMap<InputProvider::SNESButton, QGamepadInputInfos> m_mapping;
     QString    buttonToText(QGamepadInputInfos);
 };
 

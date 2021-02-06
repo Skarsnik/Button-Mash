@@ -37,7 +37,9 @@ SOURCES += \
         mapbuttondialog.cpp \
         usb2snessource.cpp \
         usb2snes.cpp \
-    snesclassictelnet.cpp
+    snesclassictelnet.cpp \
+    configurationdialog.cpp \
+    qgamepadinputinfos.cpp
 
 HEADERS += \
         skinselector.h \
@@ -52,13 +54,19 @@ HEADERS += \
         mapbuttondialog.h \
         usb2snessource.h \
         usb2snes.h \
-    snesclassictelnet.h
+    snesclassictelnet.h \
+    configurationdialog.h \
+    qgamepadinputinfos.h
 
 FORMS += \
         skinselector.ui \
         inputdisplay.ui \
         inputsourceselector.ui \
-        mapbuttondialog.ui
+        mapbuttondialog.ui \
+    configurationdialog.ui
 
 RC_FILE += \
     buttonmash.rc
+
+RESOURCES += \
+    ressources.qrc

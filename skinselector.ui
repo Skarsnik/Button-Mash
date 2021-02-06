@@ -137,6 +137,9 @@
      <enum>Qt::Vertical</enum>
     </property>
     <widget class="QPushButton" name="configHSButton">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="maximumSize">
       <size>
        <width>16777215</width>

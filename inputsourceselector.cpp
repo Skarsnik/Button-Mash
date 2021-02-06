@@ -1,4 +1,5 @@
 #include "inputsourceselector.h"
+#include "mapbuttondialog.h"
 #include "ui_inputsourceselector.h"
 
 #include <QSerialPortInfo>
@@ -20,6 +21,9 @@ const QString SETTING_USB2SNES_GAME =  "Usb2SnesGame";
 const QString SETTING_ARDUINO = "Arduino";
 const QString SETTING_ARDUINOCOM = "ArduinoCOM";
 const QString SETTING_DIRECT_INPUT = "DirectInput";
+const QString SETTING_QGAMEPAD_INPUT = "QGamepad";
+const QString SETTING_QGAMEPAD_MAPPING = "QGamepad/mapping";
+const QString SETTING_QGAMEPAD_DEVICEID = "QGamepaddeviceid";
 
 InputSourceSelector::InputSourceSelector(QWidget *parent) :
     QDialog(parent),
@@ -31,6 +35,7 @@ InputSourceSelector::InputSourceSelector(QWidget *parent) :
     snesClassicTelnet = nullptr;
     arduinoCom = nullptr;
     usb2snesProvider = nullptr;
+    qgamepadProvider = nullptr;
     connect(ui->sourceRadioGroup, SIGNAL(buttonClicked(QAbstractButton*)), this, SLOT(onSourceButtonClicked(QAbstractButton *)));
 }
 
@@ -73,6 +78,13 @@ InputProvider *InputSourceSelector::getLastProvider()
             ui->usb2snesRadioButton->setChecked(true);
             m_currentProvider = usb2snesProvider;
         }
+        if (inputSource == SETTING_QGAMEPAD_INPUT)
+        {
+            qgamepadProvider = new QGamepadSource(globalSetting->value("inputSource/" + SETTING_QGAMEPAD_DEVICEID).toInt());
+            qgamepadMapping = loadQGamepadMapping();
+            qgamepadProvider->setMapping(qgamepadMapping);
+            m_currentProvider = qgamepadProvider;
+        }
         return m_currentProvider;
     } else {
         snesClassicTelnet = new SNESClassicTelnet();
@@ -99,8 +111,8 @@ void InputSourceSelector::scanDevices()
         setArduinoInfo();
     auto gamepads = QGamepadManager::instance()->connectedGamepads();
     qDebug() << "Gamepads : " << gamepads.size();
-    /*if (!gamepads.isEmpty())
-        setXInputDevices();*/
+    if (!gamepads.isEmpty())
+        setQGamepads();
     QTcpSocket  testSocket;
     testSocket.connectToHost("169.254.13.37", 23);
     if (testSocket.waitForConnected(50))
@@ -128,6 +140,11 @@ void InputSourceSelector::activateSnesClassicStuff()
 
 void InputSourceSelector::activateUsb2SnesStuff()
 {
+    if (usb2snesProvider == nullptr)
+    {
+        usb2snes = new USB2snes(false);
+        usb2snesProvider = new Usb2SnesSource(usb2snes);
+    }
     auto gamesList = usb2snesProvider->loadGamesList();
     foreach (QString game, gamesList)
     {
@@ -195,18 +212,53 @@ void InputSourceSelector::setArduinoInfo()
     ui->arduinoComComboBox->blockSignals(false);
 }
 
-void InputSourceSelector::setXInputDevices()
+void InputSourceSelector::setQGamepads()
 {
     ui->xinputComboBox->setEnabled(true);
     ui->xinputRadioButton->setEnabled(true);
     ui->xinputComboBox->clear();
     auto gamepads = QGamepadManager::instance()->connectedGamepads();
+    unsigned int cpt = 0;
     foreach(int id, gamepads)
     {
-        QGamepad pad(id);
+        //QGamepad pad(id);
         qDebug() << id;
         qDebug() << QGamepadManager::instance()->gamepadName(id);
-        ui->xinputComboBox->addItem(QString("Placeholder name %1").arg(id));
+        ui->xinputComboBox->addItem(QString("XInput Device %1").arg(id));
+        ui->xinputComboBox->setItemData(cpt, id, Qt::UserRole + 1);
+        cpt++;
+    }
+}
+
+QGamepadMapping InputSourceSelector::loadQGamepadMapping()
+{
+    QGamepadMapping toret;
+
+    QMetaEnum snesButtonMeta = QMetaEnum::fromType<InputProvider::SNESButton>();
+    for (unsigned int i = 0; i < snesButtonMeta.keyCount(); i++)
+    {
+        const char* keyName = snesButtonMeta.key(i);
+        if (globalSetting->contains(SETTING_QGAMEPAD_MAPPING + "/Button" + keyName))
+        {
+            toret[InputProvider::SNESButton(snesButtonMeta.value(i))]
+                    = QGamepadInputInfos::fromString(globalSetting->value(SETTING_QGAMEPAD_MAPPING + "/Button" + keyName).toString());
+        }
+    }
+    return toret;
+}
+
+
+void        InputSourceSelector::saveQGamepadMapping(QGamepadMapping mapping)
+{
+    QMapIterator<InputProvider::SNESButton, QGamepadInputInfos> it(mapping);
+    QMetaEnum snesButtonMeta = QMetaEnum::fromType<InputProvider::SNESButton>();
+    while (it.hasNext())
+    {
+        it.next();
+        auto button = it.key();
+        auto map = it.value();
+        const char* buttonName = snesButtonMeta.valueToKey(button);
+        globalSetting->setValue(SETTING_QGAMEPAD_MAPPING + "/Button" + buttonName, map.toString());
     }
 }
 
@@ -226,6 +278,12 @@ void InputSourceSelector::on_buttonBox_accepted()
         globalSetting->setValue(SETTING_INPUTSOURCE, SETTING_USB2SNES);
         globalSetting->setValue("inputSource/" + SETTING_USB2SNES_DEVICE, ui->usb2snesComboBox->currentText());
         globalSetting->setValue("inputSource/" + SETTING_USB2SNES_GAME, ui->usb2gameComboBox->currentText());
+    }
+    if (ui->xinputRadioButton->isChecked())
+    {
+        globalSetting->setValue(SETTING_INPUTSOURCE, SETTING_QGAMEPAD_INPUT);
+        globalSetting->setValue("inputSource/" + SETTING_QGAMEPAD_DEVICEID, ui->xinputComboBox->currentData(Qt::UserRole + 1).toInt());
+        saveQGamepadMapping(qgamepadMapping);
     }
     accept();
 }
@@ -268,6 +326,14 @@ void InputSourceSelector::onSourceButtonClicked(QAbstractButton *but)
         m_currentProvider = usb2snesProvider;
 
     }
+    if (but == ui->xinputRadioButton)
+    {
+        ui->mappingButton->setEnabled(true);
+        if (qgamepadProvider == nullptr)
+            qgamepadProvider = new QGamepadSource(ui->xinputComboBox->currentData(Qt::UserRole + 1).toInt());
+        qgamepadProvider->setMapping(qgamepadMapping);
+        m_currentProvider = qgamepadProvider;
+    }
 }
 
 void InputSourceSelector::on_arduinoComComboBox_currentIndexChanged(const QString &arg1)
@@ -284,4 +350,15 @@ void InputSourceSelector::on_usb2snesComboBox_currentTextChanged(const QString &
 void InputSourceSelector::on_usb2gameComboBox_currentTextChanged(const QString &arg1)
 {
     usb2snesProvider->setGame(arg1);
+}
+
+void InputSourceSelector::on_mappingButton_clicked()
+{
+    MapButtonDialog mapDiag;
+
+    mapDiag.setMapping(qgamepadMapping);
+    if (mapDiag.exec() == QDialog::Accepted)
+    {
+        qgamepadMapping = mapDiag.mapping();
+    }
 }

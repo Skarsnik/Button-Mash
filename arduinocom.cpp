@@ -180,7 +180,7 @@ QString ArduinoCOM::statusText()
     return "Ready";
 }
 
-QString ArduinoCOM::name()
+QString ArduinoCOM::name() const
 {
     return "Arduino on " + comPort.portName();
 }

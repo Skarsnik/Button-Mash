@@ -1,4 +1,5 @@
 #include "qgamepadsource.h"
+#include <QDebug>
 
 QGamepadSource::QGamepadSource(int device)
 {
@@ -11,18 +12,19 @@ QGamepadSource::QGamepadSource(int device)
 
 void QGamepadSource::onGamepadButtonPressEvent(int deviceId, QGamepadManager::GamepadButton button, double value)
 {
+    qDebug() << "Pressed : " << button;
     if (deviceId != m_deviceId)
         return;
-    if (butMapping.contains(button));
-        emit buttonPressed(butMapping[button]);
+    if (buttonMapping.contains(button));
+        emit buttonPressed(buttonMapping[button]);
 }
 
 void QGamepadSource::onGamepadButtonReleaseEvent(int deviceId, QGamepadManager::GamepadButton button)
 {
     if (deviceId != m_deviceId)
         return;
-    if (butMapping.contains(button));
-        emit buttonReleased(butMapping[button]);
+    if (buttonMapping.contains(button));
+        emit buttonReleased(buttonMapping[button]);
 }
 
 void QGamepadSource::onGamepadAxisEvent(int deviceId, QGamepadManager::GamepadAxis axis, double value)
@@ -49,7 +51,20 @@ QString QGamepadSource::statusText()
     return tr("Gamepad connected");
 }
 
-QString QGamepadSource::name()
+QString QGamepadSource::name() const
 {
     return QGamepadManager::instance()->gamepadName(m_deviceId);
+}
+
+void QGamepadSource::setMapping(QMap<InputProvider::SNESButton, QGamepadInputInfos> map)
+{
+    QMapIterator<InputProvider::SNESButton, QGamepadInputInfos> it(map);
+    buttonMapping.clear();
+    axisMapping.clear();
+    while (it.hasNext())
+    {
+        it.next();
+        if (it.value().button != QGamepadManager::ButtonInvalid)
+            buttonMapping[it.value().button] = it.key();
+    }
 }

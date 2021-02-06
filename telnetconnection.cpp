@@ -98,6 +98,8 @@ void TelnetConnection::executeCommand(QString toSend)
 
 void TelnetConnection::close()
 {
+    if (m_state == Offline)
+        return;
     sDebug() << "Closing Telnet connection";
     if (m_state == Ready)
         executeCommand("exit");

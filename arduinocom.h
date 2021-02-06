@@ -44,7 +44,7 @@ public:
     void stop();
     bool isReady();
     QString statusText();
-    QString name();
+    QString name() const;
 };
 
 #endif // ARDUINOCOM_H
