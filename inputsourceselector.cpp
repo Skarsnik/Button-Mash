@@ -146,6 +146,7 @@ void InputSourceSelector::activateUsb2SnesStuff()
         usb2snesProvider = new Usb2SnesSource(usb2snes);
     }
     auto gamesList = usb2snesProvider->loadGamesList();
+    ui->usb2gameComboBox->clear();
     foreach (QString game, gamesList)
     {
         ui->usb2gameComboBox->addItem(game);
@@ -161,6 +162,7 @@ void InputSourceSelector::activateUsb2SnesStuff()
 void InputSourceSelector::onUsb2SnesConnected()
 {
     auto devices = usb2snes->deviceList();
+    ui->usb2snesComboBox->clear();
     ui->usb2snesComboBox->setEnabled(true);
     foreach(QString name, devices)
     {
@@ -227,6 +229,10 @@ void InputSourceSelector::setQGamepads()
         ui->xinputComboBox->addItem(QString("XInput Device %1").arg(id));
         ui->xinputComboBox->setItemData(cpt, id, Qt::UserRole + 1);
         cpt++;
+    }
+    if (qgamepadMapping.isEmpty() && globalSetting->contains(SETTING_QGAMEPAD_DEVICEID))
+    {
+        qgamepadMapping = loadQGamepadMapping();
     }
 }
 

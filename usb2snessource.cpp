@@ -58,7 +58,7 @@ QString Usb2SnesSource::statusText()
         return "Not connected";
     if (usb2snes->state() == USB2snes::Connected)
         return "Connected";
-    return "Kikoo";
+    return "I just don't know what went wrong!";
 }
 
 void Usb2SnesSource::setDevice(QString adevice)
@@ -109,11 +109,9 @@ void Usb2SnesSource::onTimerTick()
     {
         input = usb2snes->getAddress(address.at(0), 2);
     } else {
-        QByteArray input1 = usb2snes->getAddress(address.at(0), 1);
-        QByteArray input2;
-        if (!input1.isEmpty())
-            input2 = usb2snes->getAddress(address.at(1), 1);
-        input = input1 + input2;
+        QList<QPair<unsigned int, unsigned int> > l;
+        l << QPair<unsigned int, unsigned int>(address.at(0), 1) << QPair<unsigned int, unsigned int>(address.at(1), 1);
+        QByteArray input = usb2snes->getAddress(l);
     }
     if (input.isEmpty())
         return ;

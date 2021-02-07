@@ -43,7 +43,8 @@ void QGamepadSource::stop()
 
 bool QGamepadSource::isReady()
 {
-    return true;
+    QGamepadManager* gp = QGamepadManager::instance();
+    return gp->connectedGamepads().indexOf(m_deviceId) != -1;
 }
 
 QString QGamepadSource::statusText()

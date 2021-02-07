@@ -257,6 +257,29 @@ QByteArray USB2snes::getAddress(unsigned int addr, unsigned int size, Space spac
     return lastBinaryMessage;
 }
 
+QByteArray USB2snes::getAddress(QList<QPair<unsigned int, unsigned int> > locationPairs, USB2snes::Space space)
+{
+    m_istate = IBusy;
+    unsigned int totalSize = 0;
+    QStringList operands;
+    foreach(auto p, locationPairs)
+    {
+        operands << QString::number(p.first, 16);
+        operands << QString::number(p.second, 16);
+        totalSize += p.second;
+    }
+    sendRequest("GetAddress", operands, space);
+    requestedBinaryReadSize = totalSize;
+    QEventLoop  loop;
+    QObject::connect(this, SIGNAL(binaryMessageReceived()), &loop, SLOT(quit()));
+    QObject::connect(this, SIGNAL(disconnected()), &loop, SLOT(quit()));
+    loop.exec();
+    requestedBinaryReadSize = 0;
+    sDebug() << "Getting data,  size : " << lastBinaryMessage.size() << "- MD5 : " << QCryptographicHash::hash(lastBinaryMessage, QCryptographicHash::Md5).toHex();
+    m_istate = IReady;
+    return lastBinaryMessage;
+}
+
 void USB2snes::setAddress(unsigned int addr, QByteArray data, Space space)
 {
     m_istate = IBusy;
