@@ -1,1 +1,2 @@
 Super Mario World = F50DA4,F50DA2
+The Legend of Zelda = F500F2,F500F0

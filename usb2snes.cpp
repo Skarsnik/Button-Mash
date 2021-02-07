@@ -257,6 +257,7 @@ QByteArray USB2snes::getAddress(unsigned int addr, unsigned int size, Space spac
     return lastBinaryMessage;
 }
 
+
 QByteArray USB2snes::getAddress(QList<QPair<unsigned int, unsigned int> > locationPairs, USB2snes::Space space)
 {
     m_istate = IBusy;

@@ -29,7 +29,7 @@ void Usb2SnesSource::stop()
 {
     timer.stop();
     usb2snes->disconnect();
-    disconnect(usb2snes, &USB2snes::connected, this, 0);
+    disconnect(usb2snes, &USB2snes::connected, this, nullptr);
 }
 
 bool Usb2SnesSource::isReady()
@@ -107,11 +107,15 @@ void Usb2SnesSource::onTimerTick()
     QByteArray input;
     if (address.size() == 1)
     {
-        input = usb2snes->getAddress(address.at(0), 2);
+        /*if (address.at(0) == defaultAddress)
+            input = usb2snes->getAddress(defaultAddress, 2);
+        else*/
+            input = usb2snes->getAddress(address.at(0), 2);
+
     } else {
         QList<QPair<unsigned int, unsigned int> > l;
         l << QPair<unsigned int, unsigned int>(address.at(0), 1) << QPair<unsigned int, unsigned int>(address.at(1), 1);
-        QByteArray input = usb2snes->getAddress(l);
+        input = usb2snes->getAddress(l);
     }
     if (input.isEmpty())
         return ;

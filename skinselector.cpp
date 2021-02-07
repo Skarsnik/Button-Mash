@@ -146,6 +146,7 @@ void    SkinSelector::setSkinPath(QString path)
             var.setValue(skin);
             item->setData(var, Qt::UserRole + 2);
             listModel->appendRow(item);
+            ui->skinListView->setCurrentIndex(listModel->item(0)->index());
         }
         if (QFileInfo::exists(fi.absoluteFilePath() + "/pianodisplay.xml"))
         {
