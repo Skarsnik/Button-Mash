@@ -8,7 +8,6 @@
 #include <QGamepadManager>
 #include <QGamepad>
 #include <QLoggingCategory>
-#include <dinput.h>
 
 extern QSettings* globalSetting;
 

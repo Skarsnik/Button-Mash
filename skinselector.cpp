@@ -115,8 +115,11 @@ void    SkinSelector::saveSkinStarted()
 {
     globalSetting->setValue("lastSkin/pianoDisplay", ui->pianoCheckBox->isChecked());
     globalSetting->setValue("lastSkin/regularSkinPath", currentSkin.file);
-    globalSetting->setValue("lastSkin/pianoSkinPath", pianoModel->itemFromIndex(
-                             ui->pianoSkinListView->currentIndex())->data(Qt::UserRole + 2).value<PianoSkin>().file);
+    if (ui->pianoSkinListView->currentIndex().isValid())
+    {
+        globalSetting->setValue("lastSkin/pianoSkinPath", pianoModel->itemFromIndex(
+                                ui->pianoSkinListView->currentIndex())->data(Qt::UserRole + 2).value<PianoSkin>().file);
+    }
     globalSetting->setValue("lastSkin/regularSubSkin", currentSkin.name);
 
 }
@@ -146,6 +149,7 @@ void    SkinSelector::setSkinPath(QString path)
         }
         if (QFileInfo::exists(fi.absoluteFilePath() + "/pianodisplay.xml"))
         {
+            ui->pianoCheckBox->setEnabled(true);
             qDebug() << "Found a piano skin file";
             PianoSkin pSkin = SkinParser::parsePianoSkin(fi.absoluteFilePath() + "/pianodisplay.xml");
             //qDebug() << pSkin;
@@ -226,7 +230,11 @@ void SkinSelector::onTimerTimeout()
     }
     if (display != nullptr && display->isVisible())
         return ;
-    ui->startButton->setEnabled(inputProvider->isReady());
+    if (inputProvider->isReady() && !currentSkin.name.isEmpty())
+        ui->startButton->setEnabled(true);
+    else {
+        ui->startButton->setEnabled(false);
+    }
     ui->statusLabel->setText(inputProvider->statusText());
 }
 
