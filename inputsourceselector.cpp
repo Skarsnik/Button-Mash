@@ -12,6 +12,8 @@
 extern QSettings* globalSetting;
 
 const QString SETTING_INPUTSOURCE = "inputSource/inputSource";
+const QString SETTING_DELAI = "delai";
+
 const QString SETTING_SNESCLASSIC_TELNET = "SnesClassicTelnet";
 const QString SETTING_SNESCLASSIC_STUFF = "SnesClassicStuff";
 const QString SETTING_USB2SNES = "Usb2Snes";
@@ -35,6 +37,12 @@ InputSourceSelector::InputSourceSelector(QWidget *parent) :
     arduinoCom = nullptr;
     usb2snesProvider = nullptr;
     qgamepadProvider = nullptr;
+    m_delai = 0;
+    if (globalSetting->contains(SETTING_DELAI))
+    {
+        m_delai = globalSetting->value(SETTING_DELAI).toUInt();
+        ui->delaiSpinBox->setValue(m_delai);
+    }
     connect(ui->sourceRadioGroup, SIGNAL(buttonClicked(QAbstractButton*)), this, SLOT(onSourceButtonClicked(QAbstractButton *)));
 }
 
@@ -81,15 +89,13 @@ InputProvider *InputSourceSelector::getLastProvider()
         {
             qgamepadProvider = new QGamepadSource(globalSetting->value("inputSource/" + SETTING_QGAMEPAD_DEVICEID).toInt());
             qgamepadMapping = loadQGamepadMapping();
+            qDebug() << "Number of key binded :" << qgamepadMapping.size();
             qgamepadProvider->setMapping(qgamepadMapping);
             m_currentProvider = qgamepadProvider;
         }
         return m_currentProvider;
     } else {
-        snesClassicTelnet = new SNESClassicTelnet();
-        ui->snesClassicRadioButton->setChecked(true);
-        m_currentProvider = snesClassicTelnet;
-        toret = snesClassicTelnet;
+        return nullptr;
     }
     //arduinoCom = new ArduinoCOM("COM6");
     //return arduinoCom;
@@ -125,6 +131,11 @@ void InputSourceSelector::scanDevices()
     if (testSocket.waitForConnected(50))
         activateUsb2SnesStuff();
     testSocket.close();
+}
+
+unsigned int InputSourceSelector::delai() const
+{
+    return m_delai;
 }
 
 void InputSourceSelector::activateSnesClassicTelnet()
@@ -289,7 +300,11 @@ void InputSourceSelector::on_buttonBox_accepted()
         globalSetting->setValue(SETTING_INPUTSOURCE, SETTING_QGAMEPAD_INPUT);
         globalSetting->setValue("inputSource/" + SETTING_QGAMEPAD_DEVICEID, ui->xinputComboBox->currentData(Qt::UserRole + 1).toInt());
         saveQGamepadMapping(qgamepadMapping);
+        qgamepadProvider->setMapping(qgamepadMapping);
     }
+    m_delai = ui->delaiSpinBox->value();
+    if (m_delai != 0)
+        globalSetting->setValue(SETTING_DELAI, m_delai);
     accept();
 }
 

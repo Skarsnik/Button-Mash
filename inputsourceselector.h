@@ -29,6 +29,7 @@ public:
     InputProvider*  currentProvider();
     InputProvider*  getLastProvider();
     void    scanDevices();
+    unsigned int delai() const;
 
 
 private slots:
@@ -54,6 +55,7 @@ private:
     Ui::InputSourceSelector *ui;
     USB2snes*           usb2snes;
     InputProvider*      m_currentProvider;
+    unsigned int        m_delai;
     SNESClassicTelnet*  snesClassicTelnet;
     ArduinoCOM*         arduinoCom;
     Usb2SnesSource*     usb2snesProvider;

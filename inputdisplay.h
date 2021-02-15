@@ -24,8 +24,9 @@ class InputDisplay : public QWidget
     };
 
 public:
-    explicit InputDisplay(RegularSkin skin, PianoSkin pSkin, QWidget *parent = nullptr);
-    void     setInputProvider(InputProvider* inp);
+    explicit    InputDisplay(RegularSkin skin, PianoSkin pSkin, QWidget *parent = nullptr);
+    void        setInputProvider(InputProvider* inp);
+    void        setDelai(unsigned int delai);
     ~InputDisplay();
 
 signals:
@@ -53,6 +54,9 @@ private:
     QTimer              pianoTimer;
     uint                pianoHeight;
     uint                pianoTimeRange;
+    unsigned int        m_delai;
+
+    void setConnectionWithDelai();
     void filterPianoEvent();
     void setPianoLabel();
     void configPianoDisplay(PianoSkin pSkin);

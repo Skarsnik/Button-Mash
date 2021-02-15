@@ -34,7 +34,6 @@ SkinSelector::SkinSelector(QWidget *parent) :
     timer.setInterval(50);
     timer.start();
     display = nullptr;
-    //ui->statusLabel->setText("Trying to connect to the SNES Classic, be sure you have hakchi CE installed on it");
     connect(&timer, &QTimer::timeout, this, &SkinSelector::onTimerTimeout);
     inputSelector = new InputSourceSelector(this);
 }
@@ -182,6 +181,8 @@ void SkinSelector::on_startButton_clicked()
     }
     display = new InputDisplay(currentSkin, pSkin);
     display->setInputProvider(inputProvider);
+    if (inputSelector->delai() != 0)
+        display->setDelai(inputSelector->delai());
     connect(display, &InputDisplay::closed, this, &SkinSelector::onDisplayClosed);
     display->show();
     inputProvider->start();

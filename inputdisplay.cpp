@@ -54,6 +54,8 @@ InputDisplay::InputDisplay(RegularSkin skin, PianoSkin pSkin, QWidget *parent) :
     pianoTimer.start();
     pianoTimeRange = 3000;
     pianoHeight = 0;
+    inputProvider = nullptr;
+    m_delai = 0;
     ui->pianoLabel->setVisible(false);
     ui->pianoTagLabel->setVisible(false);
     int windowWidth = scene->sceneRect().width() + 10;
@@ -76,10 +78,40 @@ InputDisplay::InputDisplay(RegularSkin skin, PianoSkin pSkin, QWidget *parent) :
 void InputDisplay::setInputProvider(InputProvider *inp)
 {
     inputProvider = inp;
-    connect(inputProvider, &InputProvider::buttonPressed, this, &InputDisplay::onButtonPressed, Qt::UniqueConnection);
-    connect(inputProvider, &InputProvider::buttonReleased, this, &InputDisplay::onButtonReleased, Qt::UniqueConnection);
+    if (m_delai == 0) {
+        connect(inputProvider, &InputProvider::buttonPressed, this, &InputDisplay::onButtonPressed, Qt::UniqueConnection);
+        connect(inputProvider, &InputProvider::buttonReleased, this, &InputDisplay::onButtonReleased, Qt::UniqueConnection);
+    } else {
+        setConnectionWithDelai();
+    }
     connect(inputProvider, &InputProvider::unReady, this, &InputDisplay::close);
 }
+
+void InputDisplay::setConnectionWithDelai()
+{
+    disconnect(inputProvider, &InputProvider::buttonPressed, this, &InputDisplay::onButtonPressed);
+    disconnect(inputProvider, &InputProvider::buttonReleased, this, &InputDisplay::onButtonReleased);
+    connect(inputProvider, &InputProvider::buttonPressed, this, [=] (InputProvider::SNESButton button) {
+        QTimer::singleShot(m_delai, this, [=]{
+            onButtonPressed(button);
+        });
+    });
+    connect(inputProvider, &InputProvider::buttonReleased, this, [=] (InputProvider::SNESButton button) {
+        QTimer::singleShot(m_delai, this, [=]{
+            onButtonReleased(button);
+        });
+    });
+}
+
+void InputDisplay::setDelai(unsigned int delai)
+{
+    m_delai = delai;
+    if (inputProvider != nullptr)
+        setConnectionWithDelai();
+}
+
+
+
 
 void    InputDisplay::configPianoDisplay(PianoSkin pSkin)
 {
