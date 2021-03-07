@@ -3,5 +3,5 @@
     "description" : "An input display for SNES - support Snes Classic, Arduino, Usb2Snes",
     "executable" : "ButtonMash",
     "icon" : "icone.png",
-    "QtApp" : true
+    "QtApp" : false
 }
