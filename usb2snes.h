@@ -67,6 +67,7 @@ public:
     Q_ENUM(InternalState)
 
     USB2snes(bool autoAttach);
+    USB2snes();
     void                    usePort(QString port);
     QString                 port();
     QString                 getRomName();
@@ -137,6 +138,7 @@ private:
     void            changeState(State s);
     QStringList     getJsonResults(QString json);
 
+    void init(bool autoAttach);
 };
 
 #endif // USB2SNES_H

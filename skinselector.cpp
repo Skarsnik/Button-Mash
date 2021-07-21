@@ -230,7 +230,7 @@ void SkinSelector::onTimerTimeout()
             ui->sourceLabel->setText(tr("No Source provider selected"));
         return ;
     }
-    if (display != nullptr && display->isVisible())
+    if (display != nullptr && display->isVisible() || inputProvider == nullptr)
         return ;
     if (inputProvider->isReady() && !currentSkin.name.isEmpty())
         ui->startButton->setEnabled(true);

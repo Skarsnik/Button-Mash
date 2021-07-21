@@ -40,6 +40,7 @@ SOURCES += \
     snesclassictelnet.cpp \
     configurationdialog.cpp \
     qgamepadinputinfos.cpp \
+    skineditor.cpp \
     skineditor.cpp
 
 HEADERS += \
@@ -58,6 +59,7 @@ HEADERS += \
     snesclassictelnet.h \
     configurationdialog.h \
     qgamepadinputinfos.h \
+    skineditor.h \
     skineditor.h
 
 FORMS += \
@@ -66,6 +68,7 @@ FORMS += \
         inputsourceselector.ui \
         mapbuttondialog.ui \
     configurationdialog.ui \
+    skineditor.ui \
     skineditor.ui
 
 RC_FILE += \
