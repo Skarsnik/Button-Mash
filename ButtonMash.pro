@@ -71,5 +71,10 @@ FORMS += \
 RC_FILE += \
     buttonmash.rc
 
+macx: {
+	QMAKE_INFO_PLIST = Info.plist
+	ICON = Icon128x128.icns
+}
+
 RESOURCES += \
     ressources.qrc
