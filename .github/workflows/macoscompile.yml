@@ -45,7 +45,9 @@ jobs:
           qmake ButtonMash.pro
           make
       - name: Create dmg
-        run: macdeployqt ButtonMash.app -dmg
+        run: |
+            export PATH="/usr/local/opt/qt5/bin:$PATH"
+            macdeployqt ButtonMash.app -dmg
 
       - name: Upload dmg
         uses: actions/upload-artifact@v2
