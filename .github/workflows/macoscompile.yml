@@ -7,6 +7,8 @@ on:
   # Triggers the workflow on push or pull request events but only for the master branch
   push:
     branches: [ master ]
+    tags:
+      - '*'
   pull_request:
     branches: [ master ]
 
@@ -26,6 +28,8 @@ jobs:
       - uses: actions/checkout@v2
         with: 
           submodules : true
+      - uses: little-core-labs/get-git-tag@v3.0.1
+        id: tagName
           
 
       # Runs a single command using the runners shell
@@ -40,3 +44,26 @@ jobs:
           export PATH="/usr/local/opt/qt5/bin:$PATH"
           qmake ButtonMash.pro
           make
+      - name: Create dmg
+        run: macdeployqt ButtonMash.app -dmg
+
+      - name: Upload dmg
+        uses: actions/upload-artifact@v2
+        with:
+          name: ButtonMash.dmg
+          path: ButtonMash.dmg
+
+      - name: Prep Release
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+             cp ButtonMash.dmg "ButtonMash-$env:GIT_TAG_NAME.dmg"
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: "ButtonMash-${{ steps.tagName.outputs.tag }}.dmg"
+          draft: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
