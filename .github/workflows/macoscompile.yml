@@ -58,7 +58,7 @@ jobs:
       - name: Prep Release
         if: startsWith(github.ref, 'refs/tags/')
         run: |
-             cp ButtonMash.dmg "ButtonMash-$env:GIT_TAG_NAME.dmg"
+             cp ButtonMash.dmg "ButtonMash-$GIT_TAG_NAME.dmg"
 
       - name: Release
         uses: softprops/action-gh-release@v1
