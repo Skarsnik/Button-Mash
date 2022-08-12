@@ -5,9 +5,10 @@
 #include <QAbstractButton>
 #include <QDialog>
 #include <QGamepadManager>
+#include <QTimer>
 
 #include "inputprovider.h"
-#include "qgamepadinputinfos.h"
+#include "localcontrollermanager.h"
 
 
 namespace Ui {
@@ -20,8 +21,9 @@ class MapButtonDialog : public QDialog
 
 public:
     explicit MapButtonDialog(QWidget *parent = nullptr);
-    void                                                setMapping(QMap<InputProvider::SNESButton, QGamepadInputInfos> mapping);
-    QMap<InputProvider::SNESButton, QGamepadInputInfos> mapping() const;
+    void     setDevice(LocalControllerInfos device);
+    void     setMapping(QMap<InputProvider::SNESButton, LocalControllerButtonAxisInfos> mapping);
+    QMap<InputProvider::SNESButton, LocalControllerButtonAxisInfos> mapping() const;
     ~MapButtonDialog();
 
 
@@ -32,6 +34,8 @@ private slots:
 
     void    onGamepadAxisEvent(int deviceId, QGamepadManager::GamepadAxis axis, double value);
 
+    void    onDirectInputButtonEvent(QGameControllerButtonEvent* event);
+    void    onDirectInputAxisEvent(QGameControllerAxisEvent* event);
 
 private:
     Ui::MapButtonDialog *ui;
@@ -39,9 +43,13 @@ private:
     QPushButton*    m_currentButton;
     InputProvider::SNESButton   butVal;
     bool            setMode;
+    int             qGamepadDevice_id;
+    int             directInputDevice_id;
+    QGameController* directInputDevice;
+    QTimer          directInputTimer;
 
-    QMap<InputProvider::SNESButton, QGamepadInputInfos> m_mapping;
-    QString    buttonToText(QGamepadInputInfos);
+    QMap<InputProvider::SNESButton, LocalControllerButtonAxisInfos> m_mapping;
+    QString    buttonToText(LocalControllerButtonAxisInfos);
 };
 
 #endif // MAPBUTTONDIALOG_H

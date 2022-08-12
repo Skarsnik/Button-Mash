@@ -57,15 +57,15 @@ QString QGamepadSource::name() const
     return QGamepadManager::instance()->gamepadName(m_deviceId);
 }
 
-void QGamepadSource::setMapping(QMap<InputProvider::SNESButton, QGamepadInputInfos> map)
+void QGamepadSource::setMapping(LocalControllerMapping map)
 {
-    QMapIterator<InputProvider::SNESButton, QGamepadInputInfos> it(map);
+    QMapIterator<InputProvider::SNESButton, LocalControllerButtonAxisInfos> it(map);
     buttonMapping.clear();
     axisMapping.clear();
     while (it.hasNext())
     {
         it.next();
         if (it.value().button != QGamepadManager::ButtonInvalid)
-            buttonMapping[it.value().button] = it.key();
+            buttonMapping[QGamepadManager::GamepadButton(it.value().button)] = it.key();
     }
 }

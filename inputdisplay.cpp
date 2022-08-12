@@ -171,7 +171,8 @@ void InputDisplay::onButtonReleased(InputProvider::SNESButton button)
 {
     if (mapItems.contains(mapButtonToText[button]))
         mapItems[mapButtonToText[button]]->hide();
-    pianoEvents[button].last().endTime = QTime::currentTime();
+    if (!pianoEvents[button].isEmpty())
+        pianoEvents[button].last().endTime = QTime::currentTime();
 }
 
 void    InputDisplay::filterPianoEvent()

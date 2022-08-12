@@ -1,5 +1,6 @@
 #include "inputsourceselector.h"
 #include "mapbuttondialog.h"
+#include "localcontrollermanager.h"
 #include "ui_inputsourceselector.h"
 
 #include <QSerialPortInfo>
@@ -22,9 +23,9 @@ const QString SETTING_USB2SNES_GAME =  "Usb2SnesGame";
 const QString SETTING_ARDUINO = "Arduino";
 const QString SETTING_ARDUINOCOM = "ArduinoCOM";
 const QString SETTING_DIRECT_INPUT = "DirectInput";
-const QString SETTING_QGAMEPAD_INPUT = "QGamepad";
-const QString SETTING_QGAMEPAD_MAPPING = "QGamepad/mapping";
-const QString SETTING_QGAMEPAD_DEVICEID = "QGamepaddeviceid";
+const QString SETTING_LOCAL_CONTROLLER = "LocalController";
+const QString SETTING_LOCALCONTROLLER_MAPPING = "LocalController/mapping";
+const QString SETTING_LOCALCONTROLLER_DEVICEID = "LocalControllerDeviceId";
 
 InputSourceSelector::InputSourceSelector(QWidget *parent) :
     QDialog(parent),
@@ -36,7 +37,8 @@ InputSourceSelector::InputSourceSelector(QWidget *parent) :
     snesClassicTelnet = nullptr;
     arduinoCom = nullptr;
     usb2snesProvider = nullptr;
-    qgamepadProvider = nullptr;
+    m_currentProvider = nullptr;
+    localcontrollerProvider = nullptr;
     m_delai = 0;
     if (globalSetting->contains(SETTING_DELAI))
     {
@@ -85,13 +87,15 @@ InputProvider *InputSourceSelector::getLastProvider()
             ui->usb2snesRadioButton->setChecked(true);
             m_currentProvider = usb2snesProvider;
         }
-        if (inputSource == SETTING_QGAMEPAD_INPUT)
+        if (inputSource == SETTING_LOCAL_CONTROLLER)
         {
-            qgamepadProvider = new QGamepadSource(globalSetting->value("inputSource/" + SETTING_QGAMEPAD_DEVICEID).toInt());
-            qgamepadMapping = loadQGamepadMapping();
-            qDebug() << "Number of key binded :" << qgamepadMapping.size();
-            qgamepadProvider->setMapping(qgamepadMapping);
-            m_currentProvider = qgamepadProvider;
+            localcontrollerProvider = LocalControllerManager::getManager()->createProvider(globalSetting->value("inputSource/" + SETTING_LOCALCONTROLLER_DEVICEID).toString());
+            localcontrollerMapping = LocalControllerManager::getManager()->loadMapping(*globalSetting, "inputSource/" + SETTING_LOCALCONTROLLER_MAPPING);
+            qDebug() << "Number of key binded :" << localcontrollerMapping.size();
+            localcontrollerProvider->setMapping(localcontrollerMapping);
+            //ui->xinputComboBox->setChecked(true);
+            ui->xinputRadioButton->setChecked(true);
+            m_currentProvider = localcontrollerProvider;
         }
         return m_currentProvider;
     } else {
@@ -114,10 +118,10 @@ void InputSourceSelector::scanDevices()
 
     if (!infos.isEmpty())
         setArduinoInfo();
-    auto gamepads = QGamepadManager::instance()->connectedGamepads();
+    auto gamepads = LocalControllerManager::getManager()->listController();
     qDebug() << "Gamepads : " << gamepads.size();
     if (!gamepads.isEmpty())
-        setQGamepads();
+        setLocalControllers();
     QTcpSocket  testSocket;
     testSocket.connectToHost("169.254.13.37", 23);
     if (testSocket.waitForConnected(50))
@@ -224,57 +228,26 @@ void InputSourceSelector::setArduinoInfo()
     ui->arduinoComComboBox->blockSignals(false);
 }
 
-void InputSourceSelector::setQGamepads()
+void InputSourceSelector::setLocalControllers()
 {
     ui->xinputComboBox->setEnabled(true);
     ui->xinputRadioButton->setEnabled(true);
     ui->xinputComboBox->clear();
-    auto gamepads = QGamepadManager::instance()->connectedGamepads();
+    auto gamepads = LocalControllerManager::getManager()->listController();
+    localcontrollerList = gamepads;
     unsigned int cpt = 0;
-    foreach(int id, gamepads)
+    for (auto gamepad : gamepads)
     {
         //QGamepad pad(id);
-        qDebug() << id;
-        qDebug() << QGamepadManager::instance()->gamepadName(id);
-        ui->xinputComboBox->addItem(QString("XInput Device %1").arg(id));
-        ui->xinputComboBox->setItemData(cpt, id, Qt::UserRole + 1);
+        qDebug() << gamepad.id;
+        qDebug() << gamepad.name;
+        ui->xinputComboBox->addItem(gamepad.name);
+        ui->xinputComboBox->setItemData(cpt, gamepad.id, Qt::UserRole + 1);
         cpt++;
     }
-    if (qgamepadMapping.isEmpty() && globalSetting->contains(SETTING_QGAMEPAD_DEVICEID))
+    if (localcontrollerMapping.isEmpty() && globalSetting->contains(SETTING_LOCALCONTROLLER_DEVICEID))
     {
-        qgamepadMapping = loadQGamepadMapping();
-    }
-}
-
-QGamepadMapping InputSourceSelector::loadQGamepadMapping()
-{
-    QGamepadMapping toret;
-
-    QMetaEnum snesButtonMeta = QMetaEnum::fromType<InputProvider::SNESButton>();
-    for (unsigned int i = 0; i < snesButtonMeta.keyCount(); i++)
-    {
-        const char* keyName = snesButtonMeta.key(i);
-        if (globalSetting->contains(SETTING_QGAMEPAD_MAPPING + "/Button" + keyName))
-        {
-            toret[InputProvider::SNESButton(snesButtonMeta.value(i))]
-                    = QGamepadInputInfos::fromString(globalSetting->value(SETTING_QGAMEPAD_MAPPING + "/Button" + keyName).toString());
-        }
-    }
-    return toret;
-}
-
-
-void        InputSourceSelector::saveQGamepadMapping(QGamepadMapping mapping)
-{
-    QMapIterator<InputProvider::SNESButton, QGamepadInputInfos> it(mapping);
-    QMetaEnum snesButtonMeta = QMetaEnum::fromType<InputProvider::SNESButton>();
-    while (it.hasNext())
-    {
-        it.next();
-        auto button = it.key();
-        auto map = it.value();
-        const char* buttonName = snesButtonMeta.valueToKey(button);
-        globalSetting->setValue(SETTING_QGAMEPAD_MAPPING + "/Button" + buttonName, map.toString());
+        localcontrollerMapping = LocalControllerManager::getManager()->loadMapping(*globalSetting, "inputSource/" + SETTING_LOCALCONTROLLER_MAPPING);
     }
 }
 
@@ -297,10 +270,10 @@ void InputSourceSelector::on_buttonBox_accepted()
     }
     if (ui->xinputRadioButton->isChecked())
     {
-        globalSetting->setValue(SETTING_INPUTSOURCE, SETTING_QGAMEPAD_INPUT);
-        globalSetting->setValue("inputSource/" + SETTING_QGAMEPAD_DEVICEID, ui->xinputComboBox->currentData(Qt::UserRole + 1).toInt());
-        saveQGamepadMapping(qgamepadMapping);
-        qgamepadProvider->setMapping(qgamepadMapping);
+        globalSetting->setValue(SETTING_INPUTSOURCE, SETTING_LOCAL_CONTROLLER);
+        globalSetting->setValue("inputSource/" + SETTING_LOCALCONTROLLER_DEVICEID, ui->xinputComboBox->currentData(Qt::UserRole + 1).toString());
+        LocalControllerManager::getManager()->saveMapping(*globalSetting, "inputSource/" + SETTING_LOCALCONTROLLER_MAPPING, localcontrollerMapping);
+        localcontrollerProvider->setMapping(localcontrollerMapping);
     }
     m_delai = ui->delaiSpinBox->value();
     if (m_delai != 0)
@@ -349,10 +322,12 @@ void InputSourceSelector::onSourceButtonClicked(QAbstractButton *but)
     if (but == ui->xinputRadioButton)
     {
         ui->mappingButton->setEnabled(true);
-        if (qgamepadProvider == nullptr)
-            qgamepadProvider = new QGamepadSource(ui->xinputComboBox->currentData(Qt::UserRole + 1).toInt());
-        qgamepadProvider->setMapping(qgamepadMapping);
-        m_currentProvider = qgamepadProvider;
+        if (localcontrollerProvider == nullptr)
+            localcontrollerProvider = LocalControllerManager::getManager()->createProvider(ui->xinputComboBox->currentData(Qt::UserRole + 1).toString());
+        if (localcontrollerMapping.isEmpty())
+            localcontrollerMapping = LocalControllerManager::getManager()->loadMapping(*globalSetting, SETTING_LOCALCONTROLLER_MAPPING);
+        localcontrollerProvider->setMapping(localcontrollerMapping);
+        m_currentProvider = localcontrollerProvider;
     }
 }
 
@@ -376,9 +351,10 @@ void InputSourceSelector::on_mappingButton_clicked()
 {
     MapButtonDialog mapDiag;
 
-    mapDiag.setMapping(qgamepadMapping);
+    mapDiag.setDevice(localcontrollerList.at(ui->xinputComboBox->currentIndex()));
+    mapDiag.setMapping(localcontrollerMapping);
     if (mapDiag.exec() == QDialog::Accepted)
     {
-        qgamepadMapping = mapDiag.mapping();
+        localcontrollerMapping = mapDiag.mapping();
     }
 }

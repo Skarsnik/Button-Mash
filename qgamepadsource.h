@@ -1,13 +1,13 @@
 #ifndef XINPUTSOURCE_H
 #define XINPUTSOURCE_H
 
-#include "inputprovider.h"
+#include "localcontroller.h"
 #include "qgamepadinputinfos.h"
 
 #include <QGamepadManager>
 #include <QObject>
 
-class QGamepadSource : public InputProvider
+class QGamepadSource : public LocalController
 {
 public:
     QGamepadSource(int device);
@@ -16,7 +16,7 @@ public:
     bool isReady();
     QString statusText();
     QString name() const;
-    void    setMapping(QMap<InputProvider::SNESButton, QGamepadInputInfos> map);
+    void setMapping(LocalControllerMapping mapping);
 
 private slots:
     void    onGamepadButtonPressEvent(int deviceId, QGamepadManager::GamepadButton button, double value);
@@ -28,7 +28,7 @@ private slots:
 private:
     int m_deviceId;
     QMap<QGamepadManager::GamepadButton, InputProvider::SNESButton>                 buttonMapping;
-    QMap<QPair<QGamepadManager::GamepadAxis, double>, InputProvider::SNESButton>    axisMapping;  
+    QMap<QPair<QGamepadManager::GamepadAxis, double>, InputProvider::SNESButton>    axisMapping;
 
 };
 

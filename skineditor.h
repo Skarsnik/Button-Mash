@@ -1,6 +1,7 @@
 #ifndef SKINEDITOR_H
 #define SKINEDITOR_H
 
+#include <QDir>
 #include <QWidget>
 
 namespace Ui {

@@ -41,6 +41,16 @@
     </spacer>
    </item>
    <item>
+    <widget class="QLabel" name="nameLabel">
+     <property name="text">
+      <string>Controller Name</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item>
     <layout class="QHBoxLayout" name="horizontalLayout_13">
      <item>
       <spacer name="horizontalSpacer_14">
