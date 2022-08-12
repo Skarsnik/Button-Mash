@@ -329,7 +329,10 @@
          <item>
           <widget class="QLabel" name="label_7">
            <property name="text">
-            <string>Y</string>
+            <string>&lt;span style=&quot; color:#005500;&quot;&gt;Y&lt;/span&gt;</string>
+           </property>
+           <property name="textFormat">
+            <enum>Qt::RichText</enum>
            </property>
           </widget>
          </item>
@@ -369,7 +372,10 @@
          <item>
           <widget class="QLabel" name="label_8">
            <property name="text">
-            <string>B</string>
+            <string>&lt;span style=&quot; color:#515100;&quot;&gt;B&lt;/span&gt;</string>
+           </property>
+           <property name="textFormat">
+            <enum>Qt::RichText</enum>
            </property>
           </widget>
          </item>
@@ -409,7 +415,7 @@
          <item>
           <widget class="QLabel" name="label_9">
            <property name="text">
-            <string>A</string>
+            <string>&lt;span style=&quot; color:#550000;&quot;&gt;A&lt;/span&gt;</string>
            </property>
           </widget>
          </item>
@@ -449,7 +455,7 @@
          <item>
           <widget class="QLabel" name="label_10">
            <property name="text">
-            <string>X</string>
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#00007f;&quot;&gt;X &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
           </widget>
          </item>
