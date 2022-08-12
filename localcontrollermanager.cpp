@@ -46,8 +46,10 @@ QList<LocalControllerInfos> LocalControllerManager::listController()
 LocalController *LocalControllerManager::createProvider(QString id)
 {
     qDebug() << "Creating new Localcontroller " << id;
+#ifdef Q_OS_WIN
     if (id.startsWith("DirectInput"))
         return new DirectInputSource(id.split(" ").at(1).toUInt());
+#endif
     if (id.startsWith("QGamepad"))
         return new QGamepadSource(id.split(" ").at(1).toUInt());
     return nullptr;

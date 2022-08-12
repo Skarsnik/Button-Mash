@@ -15,9 +15,13 @@ class SkinEditor : public QWidget
 public:
     explicit SkinEditor(QWidget *parent = nullptr);
     ~SkinEditor();
+    void    openSkin(const QDir& dir);
+    void    openSkin(const QString xmlPath);
 
 private:
     Ui::SkinEditor *ui;
+
+    QDir   skinDir;
 };
 
 #endif // SKINEDITOR_H

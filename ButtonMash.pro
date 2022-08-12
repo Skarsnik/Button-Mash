@@ -22,23 +22,16 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-#include($$PWD/QGameController/module/qt_gamecontroller.pri)
 
-win32:LIBS += -ldinput8 -ldxguid
-
-win32:CONFIG += c++11
-
-mac:LIBS += -framework IOKit
-mac:LIBS += -framework CoreFoundation
-
-SOURCES +=  QGameController/src/gamecontroller/qgamecontroller.cpp
-#linux:SOURCES +=  QGameController/src/gamecontroller/qgamecontroller_linux.cpp
-#mac:SOURCES +=  QGameController/src/gamecontroller/qgamecontroller_mac.cpp
-win32:SOURCES +=  QGameController/src/gamecontroller/qgamecontroller_win.cpp
-
-QGC_PUBLIC_HEADERS += QGameController/src/gamecontroller/qgamecontroller.h
-QGC_PRIVATE_HEADERS +=  QGameController/src/gamecontroller/qgamecontroller_p.h
-HEADERS += $$QGC_PUBLIC_HEADERS $$QGC_PRIVATE_HEADERS
+win32 {
+    LIBS += -ldinput8 -ldxguid
+    CONFIG += c++11
+    SOURCES +=  QGameController/src/gamecontroller/qgamecontroller.cpp
+    SOURCES +=  QGameController/src/gamecontroller/qgamecontroller_win.cpp
+    QGC_PUBLIC_HEADERS += QGameController/src/gamecontroller/qgamecontroller.h
+    QGC_PRIVATE_HEADERS +=  QGameController/src/gamecontroller/qgamecontroller_p.h
+    HEADERS += $$QGC_PUBLIC_HEADERS $$QGC_PRIVATE_HEADERS
+}
 
 SOURCES += \
         main.cpp \

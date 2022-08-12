@@ -2,7 +2,6 @@
 #define XINPUTSOURCE_H
 
 #include "localcontroller.h"
-#include "qgamepadinputinfos.h"
 
 #include <QGamepadManager>
 #include <QObject>

@@ -34,8 +34,10 @@ private slots:
 
     void    onGamepadAxisEvent(int deviceId, QGamepadManager::GamepadAxis axis, double value);
 
+#ifdef Q_OS_WIN
     void    onDirectInputButtonEvent(QGameControllerButtonEvent* event);
     void    onDirectInputAxisEvent(QGameControllerAxisEvent* event);
+#endif
 
 private:
     Ui::MapButtonDialog *ui;
@@ -44,9 +46,11 @@ private:
     InputProvider::SNESButton   butVal;
     bool            setMode;
     int             qGamepadDevice_id;
+#ifdef Q_OS_WIN
     int             directInputDevice_id;
     QGameController* directInputDevice;
     QTimer          directInputTimer;
+#endif
 
     QMap<InputProvider::SNESButton, LocalControllerButtonAxisInfos> m_mapping;
     QString    buttonToText(LocalControllerButtonAxisInfos);

@@ -37,6 +37,7 @@ void MapButtonDialog::setDevice(LocalControllerInfos device)
     qGamepadDevice_id = -1;
     directInputTimer.stop();
     ui->nameLabel->setText(device.name);
+#ifdef Q_OS_WIN
     if (device.id.startsWith("DirectInput"))
     {
         qDebug() << "Setting Direct Input";
@@ -48,6 +49,7 @@ void MapButtonDialog::setDevice(LocalControllerInfos device)
         connect(&directInputTimer, &QTimer::timeout, directInputDevice, &QGameController::readGameController);
         directInputTimer.start();
     }
+#endif
     if (device.id.startsWith("QGamepad"))
     {
         qGamepadDevice_id = device.id.split(" ").at(1).toInt();
@@ -76,8 +78,10 @@ QMap<InputProvider::SNESButton, LocalControllerButtonAxisInfos> MapButtonDialog:
 
 MapButtonDialog::~MapButtonDialog()
 {
+#ifdef Q_OS_WIN
     if (directInputDevice != nullptr)
         delete directInputDevice;
+#endif
     delete ui;
 }
 
@@ -126,6 +130,7 @@ void MapButtonDialog::onGamepadAxisEvent(int deviceId, QGamepadManager::GamepadA
     }
 }
 
+#ifdef Q_OS_WIN
 void MapButtonDialog::onDirectInputButtonEvent(QGameControllerButtonEvent *event)
 {
     qDebug() << "Direct Input event" << event->pressed();
@@ -163,6 +168,8 @@ void MapButtonDialog::onDirectInputAxisEvent(QGameControllerAxisEvent *event)
     }
 }
 
+#endif
+
 QString MapButtonDialog::buttonToText(LocalControllerButtonAxisInfos info)
 {
     QMap<QGamepadManager::GamepadButton, QString> nameMap;
@@ -186,6 +193,7 @@ QString MapButtonDialog::buttonToText(LocalControllerButtonAxisInfos info)
     nameMap[QGamepadManager::ButtonGuide] = "Guide";
     if (qGamepadDevice_id != -1 && info.button != QGamepadManager::ButtonInvalid)
         return nameMap[QGamepadManager::GamepadButton(info.button)];
+#ifdef Q_OS_WIN
     if (directInputDevice_id != -1 && info.button != -1)
     {
         return QString(tr("Button %1").arg(info.button));
@@ -194,5 +202,6 @@ QString MapButtonDialog::buttonToText(LocalControllerButtonAxisInfos info)
     {
         return QString(tr("Axis %1%2").arg(info.axis).arg(info.value >= 0 ? '+' : '-'));
     }
+#endif
     return "Nop";
 }
