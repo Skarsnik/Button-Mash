@@ -72,11 +72,11 @@ RawInputEvent    stringtoRawInputEvent(QString str)
 {
     RawInputEvent toret;
     //qDebug() << str << "code" << str.mid(20, 4) << "type : " << str.mid(16, 4);
-    toret.time_s  =  qToBigEndian<quint32>(str.left(8).toUInt(NULL, 16));
-    toret.time_us = qToBigEndian<quint32>(str.mid(8, 8).toUInt(NULL, 16));
-    toret.type = qToBigEndian<quint16>(str.mid(16, 4).toUInt(NULL, 16));
-    toret.code = qToBigEndian<quint16>(str.mid(20, 4).toUInt(NULL, 16));
-    toret.value = qToBigEndian<qint32>(str.mid(24, 8).toInt(NULL, 16));
+    toret.time_s  =  qToBigEndian<quint32>(str.leftRef(8).toUInt(NULL, 16));
+    toret.time_us = qToBigEndian<quint32>(str.midRef(8, 8).toUInt(NULL, 16));
+    toret.type = qToBigEndian<quint16>(str.midRef(16, 4).toUInt(NULL, 16));
+    toret.code = qToBigEndian<quint16>(str.midRef(20, 4).toUInt(NULL, 16));
+    toret.value = qToBigEndian<qint32>(str.midRef(24, 8).toInt(NULL, 16));
     return toret;
 }
 

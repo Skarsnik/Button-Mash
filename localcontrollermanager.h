@@ -6,10 +6,6 @@
 #include <QSettings>
 #include "inputprovider.h"
 
-#ifdef Q_OS_WIN
-#include "QGameController/src/gamecontroller/qgamecontroller.h"
-#endif
-
 class LocalController;
 
 struct LocalControllerButtonAxisInfos

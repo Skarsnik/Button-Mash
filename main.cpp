@@ -1,6 +1,6 @@
 #include "skinselector.h"
 #include <QApplication>
-#include "mapbuttondialog.h"
+
 
 int main(int argc, char *argv[])
 {

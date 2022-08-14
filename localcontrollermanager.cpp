@@ -1,7 +1,9 @@
 #include <QMetaEnum>
 #include <QDebug>
 
+#ifdef Q_OS_WIN
 #include "directinputsource.h"
+#endif
 #include "localcontrollermanager.h"
 #include "qgamepadsource.h"
 #include <QGamepadManager>
@@ -46,13 +48,15 @@ QList<LocalControllerInfos> LocalControllerManager::listController()
 LocalController *LocalControllerManager::createProvider(QString id)
 {
     qDebug() << "Creating new Localcontroller " << id;
+    LocalController* toret = nullptr;
 #ifdef Q_OS_WIN
     if (id.startsWith("DirectInput"))
-        return new DirectInputSource(id.split(" ").at(1).toUInt());
+        toret = new DirectInputSource(id.split(" ").at(1).toUInt());
 #endif
     if (id.startsWith("QGamepad"))
-        return new QGamepadSource(id.split(" ").at(1).toUInt());
-    return nullptr;
+        toret = new QGamepadSource(id.split(" ").at(1).toUInt());
+    toret->m_id = id;
+    return toret;
 }
 
 LocalControllerMapping LocalControllerManager::loadMapping(QSettings &setting, QString settingPath)

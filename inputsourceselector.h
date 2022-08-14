@@ -48,6 +48,8 @@ private slots:
 
     void on_mappingButton_clicked();
 
+    void on_xinputComboBox_currentIndexChanged(int index);
+
 private:
     Ui::InputSourceSelector *ui;
     USB2snes*           usb2snes;

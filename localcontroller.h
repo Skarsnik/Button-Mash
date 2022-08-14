@@ -5,10 +5,10 @@
 #include "inputprovider.h"
 #include "localcontrollermanager.h"
 
-
 class LocalController : public InputProvider
 {
 public:
+    friend LocalControllerManager;
     LocalController();
     virtual void start() = 0;
     virtual void stop() = 0;
@@ -16,6 +16,9 @@ public:
     virtual QString statusText() = 0;
     virtual QString name() const = 0;
     virtual void    setMapping(LocalControllerMapping) = 0;
+    QString         id() const;
+private:
+    QString m_id;
 };
 
 #endif // LOCALCONTROLLER_H

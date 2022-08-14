@@ -45,7 +45,7 @@ InputSourceSelector::InputSourceSelector(QWidget *parent) :
         m_delai = globalSetting->value(SETTING_DELAI).toUInt();
         ui->delaiSpinBox->setValue(m_delai);
     }
-    connect(ui->sourceRadioGroup, SIGNAL(buttonClicked(QAbstractButton*)), this, SLOT(onSourceButtonClicked(QAbstractButton *)));
+    connect(ui->sourceRadioGroup, qOverload<QAbstractButton*>(&QButtonGroup::buttonClicked), this, &InputSourceSelector::onSourceButtonClicked);
 }
 
 InputSourceSelector::~InputSourceSelector()
@@ -93,7 +93,6 @@ InputProvider *InputSourceSelector::getLastProvider()
             localcontrollerMapping = LocalControllerManager::getManager()->loadMapping(*globalSetting, "inputSource/" + SETTING_LOCALCONTROLLER_MAPPING);
             qDebug() << "Number of key binded :" << localcontrollerMapping.size();
             localcontrollerProvider->setMapping(localcontrollerMapping);
-            //ui->xinputComboBox->setChecked(true);
             ui->xinputRadioButton->setChecked(true);
             m_currentProvider = localcontrollerProvider;
         }
@@ -230,13 +229,14 @@ void InputSourceSelector::setArduinoInfo()
 
 void InputSourceSelector::setLocalControllers()
 {
+    ui->xinputComboBox->blockSignals(true);
     ui->xinputComboBox->setEnabled(true);
     ui->xinputRadioButton->setEnabled(true);
     ui->xinputComboBox->clear();
     auto gamepads = LocalControllerManager::getManager()->listController();
     localcontrollerList = gamepads;
     unsigned int cpt = 0;
-    for (auto gamepad : gamepads)
+    for (auto& gamepad : gamepads)
     {
         //QGamepad pad(id);
         qDebug() << gamepad.id;
@@ -249,6 +249,19 @@ void InputSourceSelector::setLocalControllers()
     {
         localcontrollerMapping = LocalControllerManager::getManager()->loadMapping(*globalSetting, "inputSource/" + SETTING_LOCALCONTROLLER_MAPPING);
     }
+    if (localcontrollerProvider != nullptr)
+    {
+        unsigned int idx;
+        for (idx = 0; idx < ui->xinputComboBox->count(); idx++)
+        {
+            qDebug() << localcontrollerProvider->id() << ui->xinputComboBox->itemData(idx, Qt::UserRole + 1).toString();
+            if (ui->xinputComboBox->itemData(idx, Qt::UserRole + 1).toString() == localcontrollerProvider->id())
+                break;
+        }
+        ui->xinputComboBox->setCurrentIndex(idx);
+        ui->mappingButton->setEnabled(true);
+    }
+    ui->xinputComboBox->blockSignals(false);
 }
 
 void InputSourceSelector::on_buttonBox_accepted()
@@ -347,6 +360,14 @@ void InputSourceSelector::on_usb2gameComboBox_currentTextChanged(const QString &
     usb2snesProvider->setGame(arg1);
 }
 
+void InputSourceSelector::on_xinputComboBox_currentIndexChanged(int index)
+{
+    if (localcontrollerProvider != nullptr)
+        delete localcontrollerProvider;
+    localcontrollerProvider = LocalControllerManager::getManager()->createProvider(ui->xinputComboBox->itemData(index, Qt::UserRole + 1).toString());
+}
+
+
 void InputSourceSelector::on_mappingButton_clicked()
 {
     MapButtonDialog mapDiag;
@@ -358,3 +379,5 @@ void InputSourceSelector::on_mappingButton_clicked()
         localcontrollerMapping = mapDiag.mapping();
     }
 }
+
+

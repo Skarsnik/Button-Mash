@@ -6,7 +6,9 @@
 #include <QDialog>
 #include <QGamepadManager>
 #include <QTimer>
-
+#ifdef Q_OS_WIN
+#include "QGameController/src/gamecontroller/qgamecontroller.h"
+#endif
 #include "inputprovider.h"
 #include "localcontrollermanager.h"
 
