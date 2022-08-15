@@ -24,7 +24,7 @@ MapButtonDialog::MapButtonDialog(QWidget *parent) :
     ui->mappingButtonGroup->setId(ui->rButton, InputProvider::R);
     ui->mappingButtonGroup->setId(ui->startButton, InputProvider::Start);
     ui->mappingButtonGroup->setId(ui->selectButton, InputProvider::Select);
-#ifndef Q_OS_WIN
+#ifdef Q_OS_WIN
     directInputDevice_id = -1;
     directInputDevice = nullptr;
     directInputTimer.setInterval(10);
