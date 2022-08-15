@@ -28,6 +28,8 @@ win32 {
     CONFIG += c++11
     SOURCES +=  QGameController/src/gamecontroller/qgamecontroller.cpp
     SOURCES +=  QGameController/src/gamecontroller/qgamecontroller_win.cpp
+    SOURCES +=  directinputsource.cpp
+    HEADERS +=  directinputsource.h
     QGC_PUBLIC_HEADERS += QGameController/src/gamecontroller/qgamecontroller.h
     QGC_PRIVATE_HEADERS +=  QGameController/src/gamecontroller/qgamecontroller_p.h
     HEADERS += $$QGC_PUBLIC_HEADERS $$QGC_PRIVATE_HEADERS
@@ -50,7 +52,6 @@ SOURCES += \
         snesclassictelnet.cpp \
         configurationdialog.cpp \
         skineditor.cpp \
-    directinputsource.cpp \
     localcontroller.cpp \
     localcontrollermanager.cpp
 
@@ -70,9 +71,8 @@ HEADERS += \
         snesclassictelnet.h \
         configurationdialog.h \
         skineditor.h \
-    directinputsource.h \
-    localcontroller.h \
-    localcontrollermanager.h
+        localcontroller.h \
+        localcontrollermanager.h
 
 FORMS += \
         skinselector.ui \
