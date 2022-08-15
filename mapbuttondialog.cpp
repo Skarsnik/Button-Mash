@@ -24,11 +24,12 @@ MapButtonDialog::MapButtonDialog(QWidget *parent) :
     ui->mappingButtonGroup->setId(ui->rButton, InputProvider::R);
     ui->mappingButtonGroup->setId(ui->startButton, InputProvider::Start);
     ui->mappingButtonGroup->setId(ui->selectButton, InputProvider::Select);
+#ifndef Q_OS_WIN
     directInputDevice_id = -1;
     directInputDevice = nullptr;
-    qGamepadDevice_id = -1;
     directInputTimer.setInterval(10);
-
+#endif
+    qGamepadDevice_id = -1;
 }
 
 void MapButtonDialog::setDevice(LocalControllerInfos device)
