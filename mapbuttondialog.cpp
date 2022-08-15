@@ -34,11 +34,11 @@ MapButtonDialog::MapButtonDialog(QWidget *parent) :
 
 void MapButtonDialog::setDevice(LocalControllerInfos device)
 {
-    directInputDevice_id = -1;
     qGamepadDevice_id = -1;
-    directInputTimer.stop();
     ui->nameLabel->setText(device.name);
 #ifdef Q_OS_WIN
+    directInputDevice_id = -1;
+    directInputTimer.stop();
     if (device.id.startsWith("DirectInput"))
     {
         qDebug() << "Setting Direct Input";
