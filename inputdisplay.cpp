@@ -50,7 +50,7 @@ InputDisplay::InputDisplay(RegularSkin skin, PianoSkin pSkin, QWidget *parent) :
     mapButtonToText[InputProvider::SNESButton::Right] = "right";
     mapButtonToText[InputProvider::SNESButton::Left] = "left";
 
-    pianoTimer.setInterval(33);
+    pianoTimer.setInterval(10);
     pianoTimer.start();
     pianoTimeRange = 3000;
     pianoHeight = 0;
