@@ -45,7 +45,7 @@ InputSourceSelector::InputSourceSelector(QWidget *parent) :
         m_delai = globalSetting->value(SETTING_DELAI).toUInt();
         ui->delaiSpinBox->setValue(m_delai);
     }
-    connect(ui->sourceRadioGroup, qOverload<QAbstractButton*>(&QButtonGroup::buttonClicked), this, &InputSourceSelector::onSourceButtonClicked);
+    connect(ui->sourceRadioGroup, QOverload<QAbstractButton*>::of(&QButtonGroup::buttonClicked), this, &InputSourceSelector::onSourceButtonClicked);
 }
 
 InputSourceSelector::~InputSourceSelector()
