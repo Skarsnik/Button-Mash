@@ -15,7 +15,7 @@ void QGamepadSource::onGamepadButtonPressEvent(int deviceId, QGamepadManager::Ga
     qDebug() << "Pressed : " << button;
     if (deviceId != m_deviceId)
         return;
-    if (buttonMapping.contains(button));
+    if (buttonMapping.contains(button))
         emit buttonPressed(buttonMapping[button]);
 }
 
@@ -23,7 +23,7 @@ void QGamepadSource::onGamepadButtonReleaseEvent(int deviceId, QGamepadManager::
 {
     if (deviceId != m_deviceId)
         return;
-    if (buttonMapping.contains(button));
+    if (buttonMapping.contains(button))
         emit buttonReleased(buttonMapping[button]);
 }
 
