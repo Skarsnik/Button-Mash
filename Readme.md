@@ -1,6 +1,6 @@
 Button Mash is an Input Display written mainly to display SNES controller input.
 
-It currently support SNES Classic hacked with Hakchi2 CE and Arduino based solution for real hardware (using Nintendo Spy firmware)
+It currently support SNES Classic hacked with Hakchi2 CE, Arduino based solution for real hardware (using Nintendo Spy firmware), Usb2Snes and regular controllers.
 
 # Skins
 
