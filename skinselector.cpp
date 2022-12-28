@@ -25,6 +25,7 @@ SkinSelector::SkinSelector(QWidget *parent) :
     pianoModel = new QStandardItemModel();
     ui->pianoSkinListView->setModel(pianoModel);
     globalSetting = new QSettings("skarsnik.nyo.fr", "InputDisplay");
+    //globalSetting->clear();
     if (globalSetting->contains("skinFolder"))
     {
         setSkinPath(globalSetting->value("skinFolder").toString());
@@ -34,6 +35,7 @@ SkinSelector::SkinSelector(QWidget *parent) :
     timer.setInterval(50);
     timer.start();
     display = nullptr;
+    inputProvider = nullptr;
     connect(&timer, &QTimer::timeout, this, &SkinSelector::onTimerTimeout);
     inputSelector = new InputSourceSelector(this);
 }
@@ -230,14 +232,18 @@ void SkinSelector::onTimerTimeout()
             ui->sourceLabel->setText(tr("No Source provider selected"));
         return ;
     }
-    if (display != nullptr && display->isVisible() || inputProvider == nullptr)
+    if ((display != nullptr && display->isVisible()) || inputProvider == nullptr)
         return ;
     if (inputProvider->isReady() && !currentSkin.name.isEmpty())
         ui->startButton->setEnabled(true);
     else {
         ui->startButton->setEnabled(false);
     }
-    ui->statusLabel->setText(inputProvider->statusText());
+    if (currentSkin.name.isEmpty())
+        ui->statusLabel->setText(tr("You need to select a skin. ") + inputProvider->statusText());
+    else {
+        ui->statusLabel->setText(inputProvider->statusText());
+    }
 }
 
 void SkinSelector::on_skinPathButton_clicked()
