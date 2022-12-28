@@ -52,8 +52,8 @@ SOURCES += \
         snesclassictelnet.cpp \
         configurationdialog.cpp \
         skineditor.cpp \
-    localcontroller.cpp \
-    localcontrollermanager.cpp
+        localcontroller.cpp \
+        localcontrollermanager.cpp
 
 HEADERS += \
         skinselector.h \
