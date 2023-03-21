@@ -1,9 +1,9 @@
 [Desktop Entry]
 Type=Application
 Version=1
-Name=Button-Mash
+Name=ButtonMash
 Comment=Button Mash is an Input Display written mainly to display SNES controller input.
-Exec=/usr/local/bin/ButtonMash
-Icon=Button-Mash.png
+Exec=/usr/bin/ButtonMash
+Icon=ButtonMash.png
 Terminal=false
 Categories=Network;Game;Utility;

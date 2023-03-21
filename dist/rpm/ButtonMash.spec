@@ -4,26 +4,28 @@ Version:  beta13
 Release:  1%{?dist}
 Summary:  websocket server protocol for accessing hardware/software that act like a SNES (or are a SNES)
 License:  GPLv3
-# URL:      https://skarsnik.github.io/%{name}/
+URL:      https://github.com/Skarsnik/Button-Mash
 Source:   https://github.com/Skarsnik/Button-Mash/archive/refs/tags/v%{version}.tar.gz
-# BuildRequires: qt6-qtbase-devel
-# BuildRequires: qt6-qtwebsockets-devel
-# BuildRequires: qt6-qtserialport-devel
+BuildRequires: qt5-qtbase-devel
+BuildRequires: qt5-qtwebsockets-devel
+BuildRequires: qt5-qtserialport-devel
+BuildRequires: qt5-qtgamepad-devel
 BuildRequires: git
 
-# Requires: qt6-qtbase
-# Requires: qt6-qtwebsockets
-# Requires: qt6-qtserialport
+Requires: qt5-qtbase
+Requires: qt5-qtwebsockets
+Requires: qt5-qtserialport
+Requires: qt5-qtgamepad
 
 %description
 Button Mash is an Input Display written mainly to display SNES controller input.
 It currently support SNES Classic hacked with Hakchi2 CE, Arduino based solution for real hardware (using Nintendo Spy firmware), Usb2Snes and regular controllers.
 
 %prep
-%autosetup -n %{name}
+%autosetup -n Button-Mash
 
 %conf
-qmake %{name}.pro CONFIG+='release'
+qmake-qt5 %{name}.pro CONFIG+='release'
 
 %build
 %make_build
