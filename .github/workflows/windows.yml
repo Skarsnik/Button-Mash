@@ -25,55 +25,34 @@ jobs:
       -
         name: Checkout
         uses: actions/checkout@v2
+        with: 
+          submodules : true
       -
        # I wish I could use Chocolatey or something else but it's a pain in the but
         name: Install Qt
         uses: jurplel/install-qt-action@v2
+        with:
+          version: '5.15.2'
       -
-        name: build      
-        run: | 
-            qmake ButtonMash.pro -spec win32-msvc "CONFIG+=release"
-            nmake
+        name: Install SPackager
+        uses: Skarsnik/sqpackager-action@main
       -
-        name: Build 7zip
-        run: |
-            mkdir -Path ButtonMash
-            Copy-Item .\release\ButtonMash.exe -Destination .\ButtonMash\
-            cd .\ButtonMash
-            windeployqt.exe --no-translations --no-system-d3d-compiler --no-opengl --no-svg --no-webkit --no-webkit2 --release ButtonMash.exe
-            mkdir -Path Skins
-            Copy-Item ..\Skins -Destination .\Skins -Recurse
-            Remove-Item imageformats -Recurse
-            Remove-Item opengl32sw.dll
-            Remove-Item libEGL.dll
-            Remove-Item libGLESV2.dll
-            Remove-Item vc_redist.x64.exe
-            Copy-Item ..\License-GPL3.txt .\
-            Copy-Item ..\Readme.md Readme.txt
-            Copy-Item ..\usb2snesgames.txt usb2snesgames.txt
-            Copy-Item ..\qusb2snesapp.json .\
-            Copy-Item ..\icone.png icone.png
-            cd ..
-            7z a ButtonMash.7z ButtonMash
+        name: build
+        run: SQPackager --build windows
       -
         name: Upload 7zip
         uses: actions/upload-artifact@v2
         with:
           name: ButtonMash.7z
-          path: ButtonMash.7z
-      -
-        name: Prep Release
-        if: startsWith(github.ref, 'refs/tags/')
-        run: |
-             Copy-Item ButtonMash.7z "ButtonMash-$env:GIT_TAG_NAME.7z"
-             dir             
-
+          path: ${{steps.build.outputs.sqpackager_win32_x64_standalone_7zip}}
       -
         name: Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: "ButtonMash-${{ steps.tagName.outputs.tag }}.7z"
+          files: |
+                 "${{steps.build.outputs.sqpackager_win32_x64_standalone_7zip}}"
+                 "${{steps.build.outputs.sqpackager_win32_x64_innosetup}}"
           draft: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
