@@ -1,0 +1,16 @@
+{
+    "name" : "Button Mash",
+    "author" : "Sylvain Colinet",
+    "author-mail" : "scolinet@gmail.com",
+    "short-description" : "A Super Nintendo controllers input viewer",
+    "description" : "Button Mash is an Input Display written mainly to display SNES controller input.
+It currently support SNES Classic hacked with Hakchi2 CE, Arduino based solution for real hardware (using Nintendo Spy firmware), Usb2Snes and regular controllers.",
+    "org" :  "fr.nyo",
+    "icon" : "icon128x128.png",
+    "desktop-categories" : ["Utility", "Game"],
+    "qt-major-version" : "qt5",
+    "files" : {
+        "Skins/" : "Skins/",
+        "usb2snesgames.txt" : "usb2snesgames.txt"
+    }
+}
