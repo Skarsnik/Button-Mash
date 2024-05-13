@@ -33,10 +33,6 @@ InputDisplay::InputDisplay(RegularSkin skin, PianoSkin pSkin, QWidget *parent) :
         newPix->hide();
     }
     ui->graphicsView->setScene(scene);
-
-    /*connect(arduino, &ArduinoCOM::buttonPressed, this, &InputDisplay::onButtonPressed);
-    connect(arduino, &ArduinoCOM::buttonReleased, this, &InputDisplay::onButtonReleased);*/
-
     mapButtonToText[InputProvider::SNESButton::A] = "a";
     mapButtonToText[InputProvider::SNESButton::B] = "b";
     mapButtonToText[InputProvider::SNESButton::X] = "x";

@@ -58,6 +58,8 @@ QString Usb2SnesSource::statusText()
         return "Not connected";
     if (usb2snes->state() == USB2snes::Connected)
         return "Connected";
+    if (usb2snes->state() == USB2snes::Ready)
+        return "Ready";
     return "I just don't know what went wrong!";
 }
 

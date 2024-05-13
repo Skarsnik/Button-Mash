@@ -6,7 +6,6 @@
 #include "ui_skinselector.h"
 #include "inputdisplay.h"
 #include "skinparser.h"
-#include "arduinocom.h"
 #include "sqpath.h"
 
 #include <QDir>
@@ -26,7 +25,7 @@ SkinSelector::SkinSelector(QWidget *parent) :
     pianoModel = new QStandardItemModel();
     ui->pianoSkinListView->setModel(pianoModel);
 #ifdef Q_OS_WINDOWS
-    globalSetting = new QSettings(QSettings::IniFormat, "ButtonMash");
+    globalSetting = new QSettings("ButtonMash", QSettings::IniFormat);
 #else
     globalSetting = new QSettings("ButtonMash");
 #endif
