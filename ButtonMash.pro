@@ -72,7 +72,8 @@ HEADERS += \
         configurationdialog.h \
         skineditor.h \
         localcontroller.h \
-        localcontrollermanager.h
+        localcontrollermanager.h \
+        sqpath.h
 
 FORMS += \
         skinselector.ui \

@@ -7,6 +7,7 @@
 #include "inputdisplay.h"
 #include "skinparser.h"
 #include "arduinocom.h"
+#include "sqpath.h"
 
 #include <QDir>
 #include <QStandardItemModel>
@@ -24,13 +25,19 @@ SkinSelector::SkinSelector(QWidget *parent) :
     ui->subSkinListView->setModel(subSkinModel);
     pianoModel = new QStandardItemModel();
     ui->pianoSkinListView->setModel(pianoModel);
-    globalSetting = new QSettings("skarsnik.nyo.fr", "InputDisplay");
+#ifdef Q_OS_WINDOWS
+    globalSetting = new QSettings(QSettings::IniFormat, "ButtonMash");
+#else
+    globalSetting = new QSettings("ButtonMash");
+#endif
     //globalSetting->clear();
     if (globalSetting->contains("skinFolder"))
     {
         setSkinPath(globalSetting->value("skinFolder").toString());
     } else {
-        setSkinPath(qApp->applicationDirPath() + "/Skins");
+        setSkinPath(SQPath::softwareDatasPath() + "/Skins");
+        if (listModel->item(0) != nullptr)
+            on_skinListView_clicked(listModel->item(0)->index());
     }
     timer.setInterval(50);
     timer.start();
@@ -38,6 +45,7 @@ SkinSelector::SkinSelector(QWidget *parent) :
     inputProvider = nullptr;
     connect(&timer, &QTimer::timeout, this, &SkinSelector::onTimerTimeout);
     inputSelector = new InputSourceSelector(this);
+    ui->configHSButton->setVisible(false);
 }
 
 void    SkinSelector::setPreviewScene(const RegularSkin& skin)
@@ -92,7 +100,9 @@ void    SkinSelector::restoreLastSkin()
                     j++;
                 }
             }
+            qDebug() << "Set preview";
             setPreviewScene(currentSkin);
+
             break;
         }
     }
@@ -127,7 +137,19 @@ void    SkinSelector::saveSkinStarted()
 
 void    SkinSelector::setSkinPath(QString path)
 {
+    listModel->clear();
+    pianoModel->clear();
+#ifdef SQPROJECT_INSTALLED
+    addSkinPath(SQPath::softwareDatasPath() + "/Skins");
+    if (path == SQPath::softwareDatasPath() + "/Skins")
+        return ;
+#endif
     globalSetting->setValue("skinFolder", path);
+    addSkinPath(path);
+}
+
+void    SkinSelector::addSkinPath(QString path)
+{
     ui->skinPathEdit->setText(path);
     QDir dir(path);
     dir.setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
@@ -147,7 +169,7 @@ void    SkinSelector::setSkinPath(QString path)
             var.setValue(skin);
             item->setData(var, Qt::UserRole + 2);
             listModel->appendRow(item);
-            ui->skinListView->setCurrentIndex(listModel->item(0)->index());
+            //ui->skinListView->setCurrentIndex(listModel->item(0)->index());
         }
         if (QFileInfo::exists(fi.absoluteFilePath() + "/pianodisplay.xml"))
         {
@@ -160,7 +182,7 @@ void    SkinSelector::setSkinPath(QString path)
             var.setValue(pSkin);
             item->setData(var, Qt::UserRole + 2);
             pianoModel->appendRow(item);
-            ui->pianoSkinListView->setCurrentIndex(pianoModel->item(0)->index());
+            //ui->pianoSkinListView->setCurrentIndex(pianoModel->item(0)->index());
         }
 
     }
@@ -250,7 +272,11 @@ void SkinSelector::on_skinPathButton_clicked()
 {
     QString dir = QFileDialog::getExistingDirectory(this, tr("Choose the default folder for skins"), qApp->applicationDirPath() + "/Skins");
     if (!dir.isEmpty())
+    {
         setSkinPath(dir);
+        if (listModel->item(0) != nullptr)
+            on_skinListView_clicked(listModel->item(0)->index());
+    }
 }
 
 void SkinSelector::on_subSkinListView_clicked(const QModelIndex &index)
@@ -282,8 +308,6 @@ void SkinSelector::on_changeSourceButton_clicked()
 void SkinSelector::on_configHSButton_clicked()
 {
     static bool hide = true;
-    return ;
-
     if (hide)
         ui->configFrame->hide();
     else

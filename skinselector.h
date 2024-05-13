@@ -56,6 +56,7 @@ private:
     InputSourceSelector* inputSelector;
 
     void    setSkinPath(QString path);
+    void    addSkinPath(QString path);
     void    setPreviewScene(const RegularSkin &skin);
     void    saveSkinStarted();
     void    restoreLastSkin();

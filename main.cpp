@@ -6,6 +6,8 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+    QCoreApplication::setApplicationName("ButtonMash");
+    QCoreApplication::setOrganizationDomain("nyo.fr");
     SkinSelector w;
     /*SkinEditor e;
     e.show();*/
