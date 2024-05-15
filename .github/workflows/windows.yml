@@ -44,7 +44,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: ButtonMash.7z
-          path: ${{steps.build.outputs.sqpackager_win32_x64_standalone_7zip}}
+          path: "${{steps.build.outputs.sqpackager_win32_x64_standalone_7zip}}"
       -
         name: Release
         uses: softprops/action-gh-release@v1
