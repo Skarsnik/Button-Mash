@@ -38,6 +38,7 @@ jobs:
         uses: Skarsnik/sqpackager-action@main
       -
         name: build
+        id: build
         run: SQPackager --build windows
       -
         name: Upload 7zip
