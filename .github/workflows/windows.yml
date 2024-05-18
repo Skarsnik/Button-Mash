@@ -48,12 +48,12 @@ jobs:
           path: ${{ steps.build.outputs.sqpackager_win32_x64_standalone_7zip }}
       -
         name: Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-                 ${{ steps.build.outputs.sqpackager_win32_x64_standalone_7zip }}
-                 ${{ steps.build.outputs.sqpackager_win32_x64_innosetup }}
+                 ${{ steps.build.outputs.sqpackager_win32_x64_standalone_7zip_non_native_path }}
+                 ${{ steps.build.outputs.sqpackager_win32_x64_innosetup_non_native_path }}
           draft: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
