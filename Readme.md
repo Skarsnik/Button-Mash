@@ -2,7 +2,7 @@ Button Mash is an Input Display written mainly to display SNES controller input.
 
 It currently support SNES Classic hacked with Hakchi2 CE, Arduino based solution for real hardware (using Nintendo Spy firmware), Usb2Snes and regular controllers.
 
-Note: the USB handling of the FxPax/Sd2Snes has up to five frames of jitter at all times. If you're using one of those flash carts and you want an input display that is more accurate than that, you'll need a hardware device like a RetroSpy.
+Note: if you're using a USB connection to an FxPak/Sd2Snes, the firmware will stop communicating for a period of about 5 frames, multiple times per second. This means the input display will not update during those times. If you need 100% accuracy, consider a hardware based input display solution (which Button Mash also supports) 
 
 # Skins
 
